@@ -93,7 +93,27 @@ CATS = [  # key, pattern (searched in title, conditions, keywords and MeSH terms
     ("solid", r"solid tumou?r|advanced (?:solid )?(?:cancer|malignanc)|metastatic (?:solid )?(?:cancer|tumou?r)s?\b|any (?:solid )?tumou?r|multiple (?:cancer|tumou?r) types|pan-?tumou?r|tumou?r[- ]agnostic"),
 ]
 CAT_RE = [(k, re.compile(p, re.I)) for k, p in CATS]
-GENERIC = re.compile(r"cancer|neoplas|tumou?r|carcinoma|malignan|oncolog", re.I)
+GENERIC = re.compile(r"cancer|neoplas|tumou?r(?! necrosis)|carcinoma|malignan|oncolog|leuk(?:a)?emia|lymphoma", re.I)
+PROVINCES = {"ontario": "Ontario", "quebec": "Quebec", "québec": "Quebec", "alberta": "Alberta", "british columbia": "British Columbia",
+             "britsh columbia": "British Columbia", "nova scotia": "Nova Scotia", "manitoba": "Manitoba", "saskatchewan": "Saskatchewan",
+             "new brunswick": "New Brunswick", "newfoundland and labrador": "Newfoundland and Labrador", "newfoundland": "Newfoundland and Labrador",
+             "prince edward island": "Prince Edward Island", "yukon": "Yukon", "northwest territories": "Northwest Territories", "nunavut": "Nunavut",
+             "on": "Ontario", "qc": "Quebec", "ab": "Alberta", "bc": "British Columbia", "ns": "Nova Scotia", "mb": "Manitoba", "sk": "Saskatchewan",
+             "nb": "New Brunswick", "nl": "Newfoundland and Labrador", "pe": "Prince Edward Island"}
+# first letter of a Canadian postal code gives the province
+POSTAL = {"A": "Newfoundland and Labrador", "B": "Nova Scotia", "C": "Prince Edward Island", "E": "New Brunswick", "G": "Quebec", "H": "Quebec",
+          "J": "Quebec", "K": "Ontario", "L": "Ontario", "M": "Ontario", "N": "Ontario", "P": "Ontario", "R": "Manitoba", "S": "Saskatchewan",
+          "T": "Alberta", "V": "British Columbia", "Y": "Yukon"}
+
+
+def province(state, zipc, city):
+    key = re.sub(r",?\s*canada$", "", (state or "").strip(), flags=re.I).lower()
+    if key in PROVINCES:
+        return PROVINCES[key]
+    z = (zipc or "").strip().upper()
+    if re.match(r"^[A-Z]\d[A-Z]", z) and z[0] in POSTAL:
+        return POSTAL[z[0]]
+    return ""
 ADV = re.compile(r"metasta(?:tic|sis|ses)|advanced|unresectable|inoperable|stage\s*(?:iv|4)\b|recurren|refractory|relapsed", re.I)
 EARLY = re.compile(r"early[- ]stage|early (?:breast|lung|prostate|cancer)|stage\s*(?:0|i|ii|iii|1|2|3)\b|stages?\s*(?:i|1)\s*(?:-|–|to)\s*(?:iii|3)|resectable|resected|\badjuvant|neoadjuvant|locali[sz]ed|non-?metastatic|curative", re.I)
 NOT_ADV = re.compile(r"(?:no|without|absence of|free of)\s+(?:evidence of\s+)?(?:distant\s+)?metasta", re.I)
@@ -142,7 +162,9 @@ def build(st):
                           *conds.get("conditions", []), *conds.get("keywords", []), *meshes])
     cats = [k for k, rx in CAT_RE if rx.search(tagtext)]
     if not cats:
-        cats = ["other"] if not GENERIC.search(tagtext) else ["general"]
+        if not GENERIC.search(tagtext):
+            return None, None  # not a cancer study; the broad search terms picked it up
+        cats = ["general"]
     crit = elig.get("eligibilityCriteria", "") or ""
     exttext = tagtext + " | " + NOT_ADV.sub(" ", inclusion_part(crit))
     extent = [x for x, rx in (("early", EARLY), ("advanced", ADV)) if rx.search(exttext)]
@@ -163,7 +185,8 @@ def build(st):
         cts = L.get("contacts") or []
         site_contact = next((c for c in cts if c.get("role") == "CONTACT"), None) or next(
             (c for c in cts if c.get("phone") or c.get("email")), None)
-        ca.append({"f": L.get("facility") or "Study site", "city": L.get("city") or "", "pr": L.get("state") or "",
+        ca.append({"f": L.get("facility") or "Study site", "city": L.get("city") or "",
+                   "pr": province(L.get("state"), L.get("zip"), L.get("city")),
                    "zip": L.get("zip") or "", "s": s,
                    "lat": round(g["lat"], 4) if "lat" in g else None, "lon": round(g["lon"], 4) if "lon" in g else None,
                    "c": contact_of(site_contact)})
@@ -218,6 +241,19 @@ def main():
         if fn.endswith(".json") and fn[:-5] not in keep:
             os.remove(os.path.join(OUT, "t", fn))
             removed += 1
+    city_prov = {}
+    for r in rows:
+        for x in r["s"]:
+            if x[2]:
+                city_prov.setdefault(x[1].lower(), {}).setdefault(x[2], 0)
+                city_prov[x[1].lower()][x[2]] += 1
+    filled = 0
+    for r in rows:
+        for x in r["s"]:
+            if not x[2] and x[1].lower() in city_prov:
+                x[2] = max(city_prov[x[1].lower()].items(), key=lambda kv: kv[1])[0]
+                filled += 1
+    log(f"Filled in the province for {filled} sites from their city")
     rows.sort(key=lambda r: r["id"])
     with open(os.path.join(OUT, "index.json"), "w", encoding="utf-8") as f:
         json.dump(rows, f, ensure_ascii=False, separators=(",", ":"))
