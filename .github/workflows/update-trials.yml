@@ -1,0 +1,50 @@
+name: Update trial data
+
+on:
+  schedule:
+    - cron: "23 9 * * *"     # daily, 09:23 UTC = 4:23 am Toronto in winter, 5:23 am in summer
+  workflow_dispatch: {}       # can also be run by hand from the Actions tab
+  push:
+    branches: [main]
+    paths:
+      - ".github/build_trials.py"
+      - ".github/workflows/update-trials.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-trials
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download open cancer trials with Canadian sites from ClinicalTrials.gov
+        id: build
+        continue-on-error: true    # still save the log if the download fails
+        run: python3 .github/build_trials.py
+
+      - name: Save the update
+        run: |
+          git config user.name "Claude"
+          git config user.email "noreply@anthropic.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No change to the trial data"
+          else
+            if [ "${{ steps.build.outcome }}" = "success" ]; then msg="Trial data update $(date -u +%F)"; else msg="Trial data update failed $(date -u +%F) (log only)"; fi
+            git commit -m "$msg"
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Report a failed download
+        if: steps.build.outcome != 'success'
+        run: |
+          cat data/build-log.txt
+          exit 1
