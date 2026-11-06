@@ -1,0 +1,79 @@
+name: Read eligibility with Claude
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: "How many trials to read in this run"
+        default: "40"
+  # Not on a schedule yet. To read new and changed trials automatically, put back:
+  # schedule:
+  #   - cron: "41 11 * * *"   # daily, after the trial data update
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: read-eligibility
+  cancel-in-progress: false
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pick the trials to read
+        id: pick
+        run: |
+          python3 .github/validate_eligibility.py queue "${{ inputs.batch || '40' }}" > .github/batch.txt
+          echo "Trials in this batch:"; cat .github/batch.txt
+          if [ -s .github/batch.txt ]; then echo "todo=yes" >> "$GITHUB_OUTPUT"; else echo "todo=no" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Prepare the Claude token (does not print it)
+        if: steps.pick.outputs.todo == 'yes'
+        env:
+          T: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          raw = os.environ.get("T", "")
+          joined = "".join(raw.split())
+          m = re.search(r"sk-ant-[A-Za-z0-9_\-]+", joined)
+          print("Secret found:", bool(m))
+          if not m:
+              raise SystemExit("Add a CLAUDE_CODE_OAUTH_TOKEN secret to this repository (Settings > Secrets and variables > Actions).")
+          print("::add-mask::" + m.group(0))
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write("CLAUDE_CODE_OAUTH_TOKEN=" + m.group(0) + "\n")
+          PY
+
+      - name: Read the criteria
+        if: steps.pick.outputs.todo == 'yes'
+        uses: anthropics/claude-code-action@v1
+        with:
+          prompt: "Read .github/extract.md and do what it says for every trial ID listed in .github/batch.txt."
+          claude_args: |
+            --model sonnet
+            --max-turns 250
+            --allowedTools "Read,Write,Glob"
+
+      - name: Check every value against the registry text
+        if: steps.pick.outputs.todo == 'yes'
+        run: python3 .github/validate_eligibility.py
+
+      - name: Save
+        if: steps.pick.outputs.todo == 'yes'
+        run: |
+          git config user.name "Claude"
+          git config user.email "noreply@anthropic.com"
+          git add data/e
+          if git diff --cached --quiet; then
+            echo "Nothing new to save"
+          else
+            git commit -m "Eligibility read for $(grep -c . .github/batch.txt) trials $(date -u +%F)"
+            git pull --rebase origin main
+            git push
+          fi

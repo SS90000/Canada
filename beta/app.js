@@ -64,6 +64,14 @@ en: {
   ageRange: (a, b) => a == null && b == null ? "Any age" : b == null ? `Age ${a}+` : a == null ? `Up to age ${b}` : `Age ${a} to ${b}`,
   sexOnly: { F: "Women only", M: "Men only" }, healthy: "Also accepts healthy volunteers",
   extent: { early: "Early-stage", advanced: "Advanced or metastatic" }, auto: "detected automatically",
+  stage: "Stage at diagnosis", stageAny: "Not sure", stageN: x => x === "0" ? "Stage 0" : `Stage ${x}`, stagesL: a => `Stage ${a.join(", ")}`,
+  aiRead: "read by AI", aiBadge: "AI-read eligibility", aiH: "Who this study is for (read by AI)", regText: "Registry text",
+  aiStage: "Stage:", aiPrior: "Earlier treatment:", aiBrain: "Brain metastases:", aiEcog: "Activity level:",
+  bio: { positive: "must be positive", negative: "must be negative", low: "must be low", mutation: "a change (mutation) is required", "no-mutation": "must not have this change", high: "must be high", other: "" },
+  prior: { none: "no earlier treatment for this cancer (or this stage)", required: "a specific earlier treatment is required", allowed: "earlier treatment is allowed" },
+  brain: { allowed: "allowed", "treated-only": "allowed only if treated or stable", excluded: "not allowed", required: "the study is for people with brain metastases" },
+  ecog: n => `ECOG ${n === 0 ? "0 (fully active)" : `0 to ${n}`}${n === 1 ? ": able to do at least light activities" : n === 2 ? ": up and about more than half the day" : n >= 3 ? ": limited activity is accepted" : ""}`,
+  aiNote: "Read automatically by AI from the registry text, with each point checked against the quoted wording. It can still miss or misread things. The full criteria below, and the study team, are the final word.",
   details: "Details, sites and eligibility", hide: "Hide details", save: "Save to my list", saved: "Saved", loadingD: "Loading details…",
   summaryH: "About this study", fromReg: "From the registry, in the sponsor's words:", treatments: "What is being tested",
   allSites: "Sites in Canada", siteContact: "Site contact", noContact: "No site contact listed. Study contact:", noContact2: "No contact listed. Use the registry record.",
@@ -109,6 +117,14 @@ fr: {
   ageRange: (a, b) => a == null && b == null ? "Tout âge" : b == null ? `${a} ans et plus` : a == null ? `Jusqu'à ${b} ans` : `${a} à ${b} ans`,
   sexOnly: { F: "Femmes seulement", M: "Hommes seulement" }, healthy: "Accepte aussi des volontaires en santé",
   extent: { early: "Stade précoce", advanced: "Avancé ou métastatique" }, auto: "détecté automatiquement",
+  stage: "Stade au diagnostic", stageAny: "Je ne sais pas", stageN: x => `Stade ${x}`, stagesL: a => `Stade ${a.join(", ")}`,
+  aiRead: "lu par l'IA", aiBadge: "Admissibilité lue par l'IA", aiH: "À qui s'adresse cette étude (lu par l'IA)", regText: "Texte du registre",
+  aiStage: "Stade :", aiPrior: "Traitement antérieur :", aiBrain: "Métastases cérébrales :", aiEcog: "Niveau d'activité :",
+  bio: { positive: "doit être positif", negative: "doit être négatif", low: "doit être faible", mutation: "une mutation est exigée", "no-mutation": "ne doit pas avoir cette mutation", high: "doit être élevé", other: "" },
+  prior: { none: "aucun traitement antérieur pour ce cancer (ou ce stade)", required: "un traitement antérieur précis est exigé", allowed: "un traitement antérieur est permis" },
+  brain: { allowed: "permises", "treated-only": "permises seulement si traitées ou stables", excluded: "non permises", required: "l'étude vise les personnes ayant des métastases cérébrales" },
+  ecog: n => `ECOG ${n === 0 ? "0 (pleinement actif)" : `0 à ${n}`}${n === 1 ? " : capable d'activités légères" : n === 2 ? " : debout plus de la moitié de la journée" : n >= 3 ? " : activité limitée acceptée" : ""}`,
+  aiNote: "Lu automatiquement par l'IA à partir du texte du registre (en anglais), chaque point étant vérifié par rapport au passage cité. Des erreurs restent possibles. Les critères complets ci-dessous et l'équipe de l'étude font foi.",
   details: "Détails, sites et admissibilité", hide: "Masquer les détails", save: "Ajouter à ma liste", saved: "Ajoutée", loadingD: "Chargement des détails…",
   summaryH: "À propos de cette étude", fromReg: "Selon le registre, dans les mots du promoteur (en anglais) :", treatments: "Ce qui est étudié",
   allSites: "Sites au Canada", siteContact: "Contact du site", noContact: "Aucun contact de site. Contact de l'étude :", noContact2: "Aucun contact indiqué. Consultez la fiche du registre.",
@@ -128,8 +144,8 @@ fr: {
 /* ---------- state ---------- */
 const S = { lang: "en", view: "gate", consent: false, legal: "terms", prev: "gate", sort: "best", shown: 20, city: null,
   saved: new Set(), open: new Set(), showHidden: false,
-  f: { cat: "", many: true, prov: "", near: "", lat: null, lon: null, loc: false, dist: "100", age: "", sex: "", spread: "", kinds: { treat: true, diag: true, support: true, obs: true }, closed: false } };
-let ROWS = [], META = null, CITIES = new Map(), PROVS = [], DETAIL = new Map(), LIVE = null;
+  f: { cat: "", many: true, prov: "", near: "", lat: null, lon: null, loc: false, dist: "100", age: "", sex: "", spread: "", stage: "", kinds: { treat: true, diag: true, support: true, obs: true }, closed: false } };
+let ROWS = [], META = null, EIDX = {}, ELIG = new Map(), CITIES = new Map(), PROVS = [], DETAIL = new Map(), LIVE = null;
 const t = k => T[S.lang][k];
 const LG = pair => pair[S.lang === "fr" ? 1 : 0];
 const provName = p => S.lang === "fr" ? (PROV_FR[p] || p) : p;
@@ -143,6 +159,8 @@ async function load() {
     const [rows, meta] = await Promise.all([fetch(DATA + "index.json").then(r => { if (!r.ok) throw 0; return r.json(); }),
                                             fetch(DATA + "meta.json").then(r => r.ok ? r.json() : null)]);
     ROWS = rows; META = meta;
+    try { EIDX = await fetch(DATA + "e/_index.json").then(r => r.ok ? r.json() : {}); } catch (e) { EIDX = {}; }
+    for (const r of ROWS) { const x = EIDX[r.id]; r.ai = x && x.u === r.upd ? x : null; }
     const acc = new Map();
     for (const r of ROWS) for (const s of r.s) {
       if (s[4] == null) continue;
@@ -188,8 +206,10 @@ function evaluate(r) {
   const open = sites.filter(x => OPEN(x.s[3]));
   if (!(f.closed ? sites.length : open.length)) return null;
   let hiddenBySpread = false;
-  if (f.spread === "early" && r.x.length === 1 && r.x[0] === "advanced") hiddenBySpread = true;
-  if (f.spread === "advanced" && r.x.length === 1 && r.x[0] === "early") hiddenBySpread = true;
+  const ext = r.ai && r.ai.x !== "unclear" ? (r.ai.x === "both" ? ["early", "advanced"] : [r.ai.x]) : r.x;
+  if (f.spread === "early" && ext.length === 1 && ext[0] === "advanced") hiddenBySpread = true;
+  if (f.spread === "advanced" && ext.length === 1 && ext[0] === "early") hiddenBySpread = true;
+  if (f.stage && r.ai && r.ai.s.length && !r.ai.s.includes(f.stage)) hiddenBySpread = true;
   const rec = open.filter(x => x.s[3] === "R");
   const best = [...(rec.length ? rec : open.length ? open : sites)].sort((a, b) => (a.d ?? 0) - (b.d ?? 0))[0];
   const flags = [];
@@ -249,6 +269,7 @@ function formHTML(compact) {
    <fieldset class="grp"><legend>${esc(t("about"))}</legend>
     <div class="three"><div><label for="f-age">${esc(t("age"))}</label><input id="f-age" type="number" min="0" max="120" inputmode="numeric" value="${esc(f.age)}"></div>
      <div><label for="f-sex">${esc(t("sex"))}</label><select id="f-sex"><option value="">${esc(t("sexAny"))}</option><option value="F" ${f.sex === "F" ? "selected" : ""}>${esc(t("female"))}</option><option value="M" ${f.sex === "M" ? "selected" : ""}>${esc(t("male"))}</option></select></div>
+     <div><label for="f-stage">${esc(t("stage"))}</label><select id="f-stage"><option value="">${esc(t("stageAny"))}</option>${["0", "I", "II", "III", "IV"].map(x => `<option value="${x}" ${f.stage === x ? "selected" : ""}>${esc(t("stageN")(x))}</option>`).join("")}</select></div>
      <div><label for="f-spread">${esc(t("spread"))}</label><select id="f-spread"><option value="">${esc(t("spreadAny"))}</option><option value="early" ${f.spread === "early" ? "selected" : ""}>${esc(t("early"))}</option><option value="advanced" ${f.spread === "advanced" ? "selected" : ""}>${esc(t("advanced"))}</option></select></div></div></fieldset>
    <fieldset class="grp"><legend>${esc(t("types"))}</legend><div class="chips">
     ${Object.keys(KIND).map(k => `<label class="chk" for="f-k-${k}"><input type="checkbox" id="f-k-${k}" ${f.kinds[k] ? "checked" : ""}> ${esc(LG(KIND[k]))}</label>`).join("")}</div>
@@ -259,7 +280,7 @@ function formHTML(compact) {
 function readForm() {
   const f = S.f;
   f.cat = $("f-cat").value; f.many = $("f-many").checked; f.dist = $("f-dist").value;
-  f.age = $("f-age").value; f.sex = $("f-sex").value; f.spread = $("f-spread").value; f.closed = $("f-closed").checked;
+  f.age = $("f-age").value; f.sex = $("f-sex").value; f.spread = $("f-spread").value; f.stage = $("f-stage").value; f.closed = $("f-closed").checked;
   for (const k of Object.keys(KIND)) f.kinds[k] = $("f-k-" + k).checked;
   const near = $("f-near").value.trim();
   if (f.loc && near === t("locOn")) { /* keep device location */ }
@@ -294,7 +315,7 @@ function bindForm(live) {
   form.addEventListener("submit", ev => { ev.preventDefault(); if (!S.consent) return; readForm(); S.shown = 20; S.city = null; S.view = "results"; render(); });
   const br = $("f-browse");
   if (br) br.onclick = () => { if (!S.consent) return;
-    Object.assign(S.f, { cat: "", prov: "", near: "", lat: null, lon: null, loc: false, age: "", sex: "", spread: "", closed: false });
+    Object.assign(S.f, { cat: "", prov: "", near: "", lat: null, lon: null, loc: false, age: "", sex: "", spread: "", stage: "", closed: false });
     for (const k of Object.keys(KIND)) S.f.kinds[k] = true; S.shown = 20; S.city = null; S.view = "results"; render(); };
 }
 
@@ -358,11 +379,13 @@ function card(e) {
   const elig = [t("ageRange")(r.a0 != null ? Math.round(r.a0) : null, r.a1 != null ? Math.round(r.a1) : null)];
   if (t("sexOnly")[r.sx]) elig.push(t("sexOnly")[r.sx]);
   if (r.hv) elig.push(t("healthy"));
-  const ext = r.x.length ? `${r.x.map(x => t("extent")[x]).join(" / ")} <small>(${esc(t("auto"))})</small>` : "";
+  const aiExt = r.ai && r.ai.x !== "unclear" ? (r.ai.x === "both" ? ["early", "advanced"] : [r.ai.x]) : null;
+  const ext = aiExt ? `${aiExt.map(x => t("extent")[x]).join(" / ")}${r.ai.s.length ? " · " + esc(t("stagesL")(r.ai.s)) : ""} <small>(${esc(t("aiRead"))})</small>`
+            : r.x.length ? `${r.x.map(x => t("extent")[x]).join(" / ")} <small>(${esc(t("auto"))})</small>` : "";
   const nRec = r.s.filter(s => s[3] === "R").length;
   const open = S.open.has(r.id), saved = S.saved.has(r.id);
   return `<article class="trial" id="c-${r.id}">
-    <div class="meta">${tags.join("")}<span class="nct">${r.id}</span></div>
+    <div class="meta">${tags.join("")}${r.ai ? `<span class="tag ai">${esc(t("aiBadge"))}</span>` : ""}<span class="nct">${r.id}</span></div>
     <h3>${esc(r.t)}${r.ac ? ` <span class="acr">(${esc(r.ac)})</span>` : ""}</h3>
     <p class="cats">${esc(cats)}</p>
     ${b ? `<div class="nearest">${statusBadge(b.s[3])}<span><b>${esc(b.s[0])}</b>, ${esc(b.s[1])}${b.s[2] ? ", " + esc(provName(b.s[2])) : ""}${b.d != null ? ` · ${esc(t("kmAway")(b.d))}` : ""}</span></div>` : ""}
@@ -380,8 +403,9 @@ function bindCards() {
     if (S.open.has(id)) { S.open.delete(id); box.hidden = true; box.innerHTML = ""; b.textContent = t("details"); b.setAttribute("aria-expanded", "false"); return; }
     S.open.add(id); box.hidden = false; b.textContent = t("hide"); b.setAttribute("aria-expanded", "true");
     box.innerHTML = `<p class="help">${esc(t("loadingD"))}</p>`;
-    await getDetail(id);
-    const e = evaluate(ROWS.find(r => r.id === id)) || { sites: [] };
+    const row = ROWS.find(r => r.id === id);
+    await Promise.all([getDetail(id), row && row.ai ? getElig(id) : null]);
+    const e = evaluate(row) || { sites: [] };
     box.innerHTML = detailHTML(id, e); bindCopy(box);
   });
   app.querySelectorAll("[data-save]").forEach(b => b.onclick = () => {
@@ -390,6 +414,23 @@ function bindCards() {
     const ml = $("myList"); if (ml) ml.textContent = t("myList")(S.saved.size);
   });
   app.querySelectorAll(".detail:not([hidden])").forEach(bindCopy);
+}
+async function getElig(id) {
+  if (ELIG.has(id)) return ELIG.get(id);
+  try { const d = await fetch(DATA + "e/" + id + ".json").then(r => r.json()); ELIG.set(id, d); return d; } catch (e) { return null; }
+}
+function aiHTML(id) {
+  const a = ELIG.get(id); if (!a) return "";
+  const q = x => x ? `<details class="q"><summary>${esc(t("regText"))}</summary><q lang="en">${esc(x)}</q></details>` : "";
+  const items = [];
+  if (a.extent !== "unclear" || a.stages.length) items.push(`<li><b>${esc(t("aiStage"))}</b> ${esc([a.extent !== "unclear" ? (a.extent === "both" ? t("extent").early + " / " + t("extent").advanced : t("extent")[a.extent]) : "", a.stages.length ? t("stagesL")(a.stages) : ""].filter(Boolean).join(" · "))}${q(a.stagesQuote || a.extentQuote)}</li>`);
+  for (const b of a.biomarkers) items.push(`<li><b>${esc(b.name)}</b> ${esc(t("bio")[b.need] || "")}${b.detail ? ` <span lang="en">${t("bio")[b.need] ? "– " : ""}${esc(b.detail)}</span>` : ""}${q(b.quote)}</li>`);
+  if (a.priorTreatment.need !== "unclear") items.push(`<li><b>${esc(t("aiPrior"))}</b> ${esc(t("prior")[a.priorTreatment.need])}${a.priorTreatment.detail ? ` <span lang="en">– ${esc(a.priorTreatment.detail)}</span>` : ""}${q(a.priorTreatment.quote)}</li>`);
+  if (a.brainMets.need !== "unclear") items.push(`<li><b>${esc(t("aiBrain"))}</b> ${esc(t("brain")[a.brainMets.need])}${q(a.brainMets.quote)}</li>`);
+  if (a.ecogMax != null) items.push(`<li><b>${esc(t("aiEcog"))}</b> ${esc(t("ecog")(a.ecogMax))}${q(a.ecogQuote)}</li>`);
+  for (const o of a.other) items.push(`<li><span lang="en">${esc(o.text)}</span>${q(o.quote)}</li>`);
+  return `<div class="dsec ai"><p class="eyebrow">${esc(t("aiH"))}</p>${a.who ? `<p lang="en">${esc(a.who)}</p>` : ""}
+    ${items.length ? `<ul class="facts ailist">${items.join("")}</ul>` : ""}<p class="help">${esc(t("aiNote"))}</p></div>`;
 }
 async function getDetail(id) {
   if (DETAIL.has(id)) return DETAIL.get(id);
@@ -424,7 +465,7 @@ function detailHTML(id, e) {
       ${c ? `<small>${esc(t("siteContact"))}</small><code>${esc(c)}</code>` : showCentral ? `<small>${esc(t("noContact"))}</small><code>${esc(central[0])}</code>` : OPEN(s.s) ? `<small>${esc(t("noContact2"))}</small>` : ""}
       <div class="row">${c || showCentral ? `<button class="btn ghost small" data-copy="${esc(c || central[0])}">${esc(t("copy"))}</button>` : ""}<a href="${mapsURL(s.f, s.city, s.pr)}" target="_blank" rel="noopener">${esc(t("openMap"))}</a></div></div>`; };
   const iv = (d.interventions || []).map(i => `${esc(i.name)}${i.type ? ` <small>(${esc(i.type.toLowerCase().replace(/_/g, " "))})</small>` : ""}`);
-  return `<div class="dsec"><p class="eyebrow">${esc(t("summaryH"))}</p><p class="help">${esc(t("fromReg"))}</p><p class="regsum" lang="en">${esc(d.summary).replace(/\n+/g, "<br>")}</p>
+  return `${aiHTML(id)}<div class="dsec"><p class="eyebrow">${esc(t("summaryH"))}</p><p class="help">${esc(t("fromReg"))}</p><p class="regsum" lang="en">${esc(d.summary).replace(/\n+/g, "<br>")}</p>
      ${iv.length ? `<p class="eyebrow">${esc(t("treatments"))}</p><ul class="facts">${iv.map(x => `<li lang="en">${x}</li>`).join("")}</ul>` : ""}</div>
     <div class="dsec"><p class="eyebrow">${esc(t("allSites"))} (${d.sites.length})</p><div class="sites">${sites.slice(0, 6).map(siteHTML).join("")}</div>
       ${sites.length > 6 ? `<details class="moresites"><summary>${esc(t("allN")(sites.length))}</summary><div class="sites">${sites.slice(6).map(siteHTML).join("")}</div></details>` : ""}</div>
