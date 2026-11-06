@@ -254,6 +254,21 @@ def main():
                 x[2] = max(city_prov[x[1].lower()].items(), key=lambda kv: kv[1])[0]
                 filled += 1
     log(f"Filled in the province for {filled} sites from their city")
+    import unicodedata
+    def ckey(c):
+        c = unicodedata.normalize("NFKD", c).encode("ascii", "ignore").decode().lower()
+        c = re.sub(r"[.\-']", " ", c)
+        c = re.sub(r"\bsaint\b", "st", c)
+        return " ".join(c.split())
+    spell = {}
+    for r in rows:
+        for x in r["s"]:
+            spell.setdefault((ckey(x[1]), x[2]), {}).setdefault(x[1], 0)
+            spell[(ckey(x[1]), x[2])][x[1]] += 1
+    for r in rows:
+        for x in r["s"]:
+            v = spell[(ckey(x[1]), x[2])]
+            x[1] = max(v.items(), key=lambda kv: kv[1])[0]
     rows.sort(key=lambda r: r["id"])
     with open(os.path.join(OUT, "index.json"), "w", encoding="utf-8") as f:
         json.dump(rows, f, ensure_ascii=False, separators=(",", ":"))
