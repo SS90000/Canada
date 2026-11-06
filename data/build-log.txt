@@ -1,4 +1,4 @@
-2026-11-06 05:49:54 UTC  Registry reports 1146 open cancer studies with a site in Canada
-2026-11-06 05:50:00 UTC  Downloaded 1146 study records
-2026-11-06 05:50:01 UTC  Wrote 1146 studies with 3620 Canada sites; removed 0 closed studies
-2026-11-06 05:50:01 UTC  Categories: lung 167, breast 148, solid 141, prostate 125, gyn 114, lymphoma 102, colorectal 98, leukemia 90, general 73, brain 71, pancreas 66, headneck 66, childhood 60, myeloma 55, liver 54, sarcoma 48, skin 48, bladder 47, upperGI 40, kidney 26, neuroendocrine 19, other 16, germcell 12, thyroid 10, mesothelioma 1
+2026-11-06 05:50:17 UTC  Registry reports 1146 open cancer studies with a site in Canada
+2026-11-06 05:50:22 UTC  Downloaded 1146 study records
+2026-11-06 05:50:23 UTC  Wrote 1146 studies with 3620 Canada sites; removed 0 closed studies
+2026-11-06 05:50:23 UTC  Categories: lung 167, breast 148, solid 141, prostate 125, gyn 114, lymphoma 102, colorectal 98, leukemia 90, general 73, brain 71, pancreas 66, headneck 66, childhood 60, myeloma 55, liver 54, sarcoma 48, skin 48, bladder 47, upperGI 40, kidney 26, neuroendocrine 19, other 16, germcell 12, thyroid 10, mesothelioma 1
