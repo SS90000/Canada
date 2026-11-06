@@ -1761,7 +1761,12 @@ function startLiveMap(){
       <span>${esc(t("studies")(st.counts[g]))}${" · "+esc(t({rec:"lgR",soon:"lgS",stop:"lgX"}[st.open[g]]))}</span>
       <button class="btn small" data-place-go="${g}">${esc(t("seeHere"))}</button></div>`);
   });
-  function fit(){ if(pts.length===1)map.setView(pts[0],14); else map.fitBounds(pts,{padding:[40,40],maxZoom:14}); }
+  let touched=false, lastW=0, lastH=0;
+  function fit(){ const z=map.getSize(); if(z.x<50||z.y<50)return; if(pts.length===1)map.setView(pts[0],14); else map.fitBounds(pts,{padding:[40,40],maxZoom:14}); }
+  map.setView([43.70,-79.385],11);
+  ["mousedown","touchstart","wheel","keydown"].forEach(ev=>box.addEventListener(ev,()=>{touched=true},{passive:true}));
+  if(window.ResizeObserver){ const ro=new ResizeObserver(()=>{ const w=box.clientWidth,h=box.clientHeight; if(w===lastW&&h===lastH)return; lastW=w;lastH=h; map.invalidateSize(); if(!touched)fit(); });
+    ro.observe(box); map.on("unload",()=>ro.disconnect()); }
   fit();
 }
 
