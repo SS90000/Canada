@@ -11,7 +11,7 @@ import json, os, re, sys
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 E, TDIR = os.path.join(ROOT, "e"), os.path.join(ROOT, "t")
 EXTENT = {"early", "advanced", "both", "unclear"}
-STAGES = {"0", "I", "II", "III", "IV"}
+STAGES = {"0", "I", "IA", "IB", "II", "IIA", "IIB", "IIC", "III", "IIIA", "IIIB", "IIIC", "IV", "IVA", "IVB"}
 BIO = {"positive", "negative", "low", "mutation", "no-mutation", "high", "other"}
 PRIOR = {"none", "required", "allowed", "unclear"}
 BRAIN = {"allowed", "treated-only", "excluded", "required", "unclear"}

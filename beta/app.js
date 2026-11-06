@@ -209,7 +209,7 @@ function evaluate(r) {
   const ext = r.ai && r.ai.x !== "unclear" ? (r.ai.x === "both" ? ["early", "advanced"] : [r.ai.x]) : r.x;
   if (f.spread === "early" && ext.length === 1 && ext[0] === "advanced") hiddenBySpread = true;
   if (f.spread === "advanced" && ext.length === 1 && ext[0] === "early") hiddenBySpread = true;
-  if (f.stage && r.ai && r.ai.s.length && !r.ai.s.includes(f.stage)) hiddenBySpread = true;
+  if (f.stage && r.ai && r.ai.s.length && !r.ai.s.some(x => stageFits(x, f.stage))) hiddenBySpread = true;
   const rec = open.filter(x => x.s[3] === "R");
   const best = [...(rec.length ? rec : open.length ? open : sites)].sort((a, b) => (a.d ?? 0) - (b.d ?? 0))[0];
   const flags = [];
@@ -218,6 +218,11 @@ function evaluate(r) {
   const area = S.city || f.lat != null || f.prov;
   return { r, sites, open, rec, best, flags, hiddenBySpread, area, cat: f.cat && !r.c.includes(f.cat) ? "many" : "" };
 }
+/* A trial stage x fits a person's stage u when they are the same, when x is the main stage of u
+   (trial "II", person "IIA"), or when the person gave only the main stage and x is one of its substages
+   (person "II", trial "IIB": it may fit, so the study is not hidden). */
+const mainStage = v => v === "0" ? "0" : v.replace(/[ABC]$/, "");
+function stageFits(x, u) { return x === u || x === mainStage(u) || (mainStage(x) === u && u !== x); }
 function rankKey(e) {
   const ph = /3/.test(e.r.ph) ? 3 : /2/.test(e.r.ph) ? 2 : /1/.test(e.r.ph) ? 1 : 0;
   if (S.sort === "near") return [e.rec.length ? 0 : 1, e.best?.d ?? 0, KIND_ORDER[e.r.k]];
@@ -269,7 +274,7 @@ function formHTML(compact) {
    <fieldset class="grp"><legend>${esc(t("about"))}</legend>
     <div class="three"><div><label for="f-age">${esc(t("age"))}</label><input id="f-age" type="number" min="0" max="120" inputmode="numeric" value="${esc(f.age)}"></div>
      <div><label for="f-sex">${esc(t("sex"))}</label><select id="f-sex"><option value="">${esc(t("sexAny"))}</option><option value="F" ${f.sex === "F" ? "selected" : ""}>${esc(t("female"))}</option><option value="M" ${f.sex === "M" ? "selected" : ""}>${esc(t("male"))}</option></select></div>
-     <div><label for="f-stage">${esc(t("stage"))}</label><select id="f-stage"><option value="">${esc(t("stageAny"))}</option>${["0", "I", "II", "III", "IV"].map(x => `<option value="${x}" ${f.stage === x ? "selected" : ""}>${esc(t("stageN")(x))}</option>`).join("")}</select></div>
+     <div><label for="f-stage">${esc(t("stage"))}</label><select id="f-stage"><option value="">${esc(t("stageAny"))}</option>${["0", "I", "IA", "IB", "II", "IIA", "IIB", "III", "IIIA", "IIIB", "IIIC", "IV"].map(x => `<option value="${x}" ${f.stage === x ? "selected" : ""}>${esc(t("stageN")(x))}</option>`).join("")}</select></div>
      <div><label for="f-spread">${esc(t("spread"))}</label><select id="f-spread"><option value="">${esc(t("spreadAny"))}</option><option value="early" ${f.spread === "early" ? "selected" : ""}>${esc(t("early"))}</option><option value="advanced" ${f.spread === "advanced" ? "selected" : ""}>${esc(t("advanced"))}</option></select></div></div></fieldset>
    <fieldset class="grp"><legend>${esc(t("types"))}</legend><div class="chips">
     ${Object.keys(KIND).map(k => `<label class="chk" for="f-k-${k}"><input type="checkbox" id="f-k-${k}" ${f.kinds[k] ? "checked" : ""}> ${esc(LG(KIND[k]))}</label>`).join("")}</div>

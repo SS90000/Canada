@@ -42,9 +42,12 @@ Rules for each field:
   (including after surgery or before surgery), `advanced` if only for metastatic,
   unresectable, recurrent or refractory cancer, `both` if it clearly takes both,
   `unclear` otherwise.
-- `stages`: the stages the criteria allow, using only these values: "0", "I", "II", "III", "IV".
-  Expand ranges ("stage II-III" becomes ["II","III"]; "IIB" becomes "II"). Leave empty if
-  no stage is stated.
+- `stages`: the stages the criteria allow, using only these values: "0", "I", "IA", "IB",
+  "II", "IIA", "IIB", "IIC", "III", "IIIA", "IIIB", "IIIC", "IV", "IVA", "IVB".
+  Keep substages exactly as stated ("stage IIb or III" becomes ["IIB","III"]; never
+  shorten "IIB" to "II"). Expand ranges ("stage II-III" becomes ["II","III"];
+  "stage IIB-IIIA" becomes ["IIB","IIC","III","IIIA"] only if the text says so; otherwise
+  list just the stages named). Leave empty if no stage is stated.
 - `biomarkers`: tumour or blood markers the criteria require or exclude (for example ER,
   PR, HER2, PD-L1, EGFR, ALK, ROS1, KRAS, BRAF, BRCA1/2, PIK3CA, MSI, PSMA, CD19, CD20,
   FLT3, NPM1). At most 6. Leave empty if none.
