@@ -15,11 +15,11 @@ const UNIT = MI ? "mi" : "km";
 const OPEN = s => s === "R" || s === "NYR";
 const KIND_ORDER = { treat: 0, diag: 1, support: 2, obs: 3 };
 const BLOOD = new Set(["leukemia", "lymphoma", "myeloma"]);
-const MANY = A.many ? new Set(["solid", "general"]) : new Set();
 
 /* ---------- labels ---------- */
 const A = AREAS[AREA];
 const CAT = A.cats;
+const MANY = A.many ? new Set(["solid", "general"]) : new Set();
 const KIND = { treat: ["Treatment", "Traitement"], diag: ["Diagnosis and screening", "Diagnostic et dépistage"],
   support: ["Supportive care and other", "Soins de soutien et autres"], obs: ["Observational", "Observation"] };
 const SITE = { R: ["Recruiting", "Recrute", "st-rec"], NYR: ["Coming soon", "Bientôt", "st-soon"], ANR: ["Not recruiting", "Ne recrute pas", "st-stop"],

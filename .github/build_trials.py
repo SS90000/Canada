@@ -111,7 +111,7 @@ NEURO = [
     ("dementia", r"dementia|alzheimer|cognitive (?:impairment|dysfunction|decline)|frontotemporal|lewy bod|memory (?:loss|impairment)|neurocognitive"),
     ("headache", r"migraine|headache|cluster headache|trigeminal neuralgia"),
     ("als", r"amyotrophic|\bals\b|motor neuron|spinal muscular atrophy|\bsma\b|primary lateral sclerosis"),
-    ("neuromuscular", r"neuromuscular|myasthenia|muscular dystroph|duchenne|myopath|myositis|neuropath|guillain|\bcidp\b|charcot-marie|polyneuropath|peripheral nervous system"),
+    ("neuromuscular", r"neuromuscular|myasthenia|muscular dystroph|duchenne|(?<!cardio)myopath|myositis|neuropath|guillain|\bcidp\b|charcot-marie|polyneuropath|peripheral nervous system"),
     ("injury", r"brain injur|craniocerebral trauma|head injur|concussion|spinal cord injur|traumatic brain|\btbi\b"),
     ("braintumour", r"glioma|glioblastoma|astrocytoma|medulloblastoma|ependymoma|meningioma|brain (?:tumou?r|neoplasm|metasta)|central nervous system neoplasm|leptomening|brain neoplasm"),
     ("sleep", r"sleep wake disorder|narcolepsy|insomnia|sleep apnea|hypersomnia|circadian"),
@@ -213,6 +213,8 @@ def classify(ident, conds, meshes, ancestors, healthy):
     base = " | ".join([ident.get("briefTitle", ""), ident.get("officialTitle", ""),
                        *conds.get("conditions", []), *conds.get("keywords", []), *meshes])
     full = base + " | " + " | ".join(ancestors)
+    # Sponsors' free-text keywords are noisy (schizophrenia studies list movement side effects), so neurology uses only titles, conditions and MeSH terms
+    ntext = " | ".join([ident.get("briefTitle", ""), ident.get("officialTitle", ""), *conds.get("conditions", []), *meshes])
     out = {}
     is_cancer = bool(ONC_GATE.search(base))
     onc = [k for k, rx in ONC_RE if rx.search(base)] if is_cancer else []
@@ -222,7 +224,7 @@ def classify(ident, conds, meshes, ancestors, healthy):
         onc = []  # only benign growths (for example fibroids or polyps)
     if onc:
         out["oncology"] = onc
-    neuro = [k for k, rx in NEURO_RE if rx.search(base)]  # broad MeSH ancestors pulled in psychiatry, ICU and pain studies
+    neuro = [k for k, rx in NEURO_RE if rx.search(ntext)]  # broad MeSH ancestors pulled in psychiatry, ICU and pain studies
     if len(neuro) > 1 and "generalneuro" in neuro:
         neuro.remove("generalneuro")  # only use the catch-all when nothing more specific matched
     if neuro:
