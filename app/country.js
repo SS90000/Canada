@@ -4,6 +4,7 @@ const COUNTRY = {
   code: "CA",
   name: ["Canada", "Canada"],
   inName: ["in Canada", "au Canada"],
+  locale: ["en-CA", "fr-CA"], mapName: "Canada",
   langs: ["en", "fr"],
   unit: "km",
   dists: [25, 50, 100, 250, 500],

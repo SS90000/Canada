@@ -45,7 +45,7 @@ const T = {
         onc: "Cancer", oncP: "All types of cancer, including blood cancers and childhood cancers.",
         neu: "Neurological conditions", neuP: "Stroke, epilepsy, MS, Parkinson's, dementia, migraine, ALS and more.",
         oth: "Other conditions", othP: "Heart, lungs, diabetes, mental health, infections, pregnancy, rare diseases and healthy volunteers.",
-        go: "Open the finder →", studies: n => `${n.toLocaleString("en-CA")} open studies`,
+        go: "Open the finder →", studies: n => `${n.toLocaleString(COUNTRY.locale[0])} open studies`,
         note: d => `Beta. Not medical advice. Data from ClinicalTrials.gov, updated daily${d ? ` (last update ${d})` : ""}. In an emergency, call 911.`,
         foot: `Operated by ${ORG.name}. Not affiliated with or endorsed by ClinicalTrials.gov or the U.S. National Library of Medicine.` },
   fr: { sub: `${COUNTRY.name[1]} · Bêta`, h1: `Trouver des essais cliniques ${COUNTRY.inName[1]}`,
@@ -53,7 +53,7 @@ const T = {
         onc: "Cancer", oncP: "Tous les types de cancer, y compris les cancers du sang et de l'enfant.",
         neu: "Affections neurologiques", neuP: "AVC, épilepsie, SEP, Parkinson, démence, migraine, SLA et plus.",
         oth: "Autres affections", othP: "Cœur, poumons, diabète, santé mentale, infections, grossesse, maladies rares et volontaires en santé.",
-        go: "Ouvrir l'outil →", studies: n => `${n.toLocaleString("fr-CA")} études ouvertes`,
+        go: "Ouvrir l'outil →", studies: n => `${n.toLocaleString(COUNTRY.locale[1])} études ouvertes`,
         note: d => `Bêta. Ne constitue pas un avis médical. Données de ClinicalTrials.gov, mises à jour chaque jour${d ? ` (dernière mise à jour : ${d})` : ""}. En cas d'urgence, composez le 911.`,
         foot: `Exploité par ${ORG.name}. Non affilié à ClinicalTrials.gov ni à la National Library of Medicine des États-Unis, et non approuvé par eux.` }
 };
@@ -68,7 +68,7 @@ function render() {
   document.getElementById("lede").textContent = t.lede;
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t[el.dataset.t]);
   document.querySelectorAll("[data-n]").forEach(el => { const a = META && META.areas && META.areas[el.dataset.n]; el.textContent = a ? t.studies(a.studies) : "…"; });
-  const d = META ? new Date(META.built).toLocaleDateString(lang === "fr" ? "fr-CA" : "en-CA", { year: "numeric", month: "short", day: "numeric" }) : "";
+  const d = META ? new Date(META.built).toLocaleDateString(COUNTRY.locale[lang === "fr" ? 1 : 0], { year: "numeric", month: "short", day: "numeric" }) : "";
   document.getElementById("note").textContent = t.note(d);
   document.getElementById("foot").textContent = t.foot;
   document.getElementById("lang-en").setAttribute("aria-pressed", lang === "en");

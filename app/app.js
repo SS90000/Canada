@@ -1,4 +1,4 @@
-/* Cancer Trial Finder (Canada) – page logic.
+/* Clinical Trial Finder – page logic (area and country come from areas.js and country.js).
    Settings (Mapbox token, organization name, contact) are at the top of index.html. */
 "use strict";
 
@@ -140,7 +140,7 @@ for (const [i, lg] of [[0, "en"], [1, "fr"]]) {
   x.sub = `${COUNTRY.name[i]} · ${A.short[i]} · ${i ? "Bêta" : "Beta"}`;
   x.band = (n, d) => i ? `Bêta. Ne constitue pas un avis médical. Présente les ${n} ${A.studies[1]} ayant des sites ${COUNTRY.inName[1]} sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`
                        : `Beta. Not medical advice. Lists all ${n} ${A.studies[0]} with sites ${COUNTRY.inName[0]} on ClinicalTrials.gov, updated daily (last update ${d}).`;
-  x.h1 = A.h1(COUNTRY.name)[i]; x.lede = A.lede[i];
+  x.h1 = A.h1(COUNTRY.inName)[i]; x.lede = A.lede[i];
   x.b3 = (i ? "Les détails proviennent de ClinicalTrials.gov et peuvent être dépassés. " : "Study details come from ClinicalTrials.gov and can be out of date. ") + A.tagNote[i];
   x.cat = A.catLabel[i]; x.catAny = A.catAny[i]; x.prov = COUNTRY.region[i]; x.provAny = COUNTRY.regionAny[i];
   x.brand = A.brand[i];
@@ -155,7 +155,7 @@ const t = k => T[S.lang][k];
 const LG = pair => pair[S.lang === "fr" ? 1 : 0];
 const provName = p => S.lang === "fr" ? (PROV_FR[p] || p) : p;
 const fmtDate = d => { if (!d) return ""; const x = new Date((d.length === 7 ? d + "-01" : d) + "T12:00:00");
-  return x.toLocaleDateString(S.lang === "fr" ? "fr-CA" : "en-CA", d.length === 7 ? { year: "numeric", month: "long" } : { year: "numeric", month: "short", day: "numeric" }); };
+  return x.toLocaleDateString(COUNTRY.locale[S.lang === "fr" ? 1 : 0], d.length === 7 ? { year: "numeric", month: "long" } : { year: "numeric", month: "short", day: "numeric" }); };
 const cityKey = (c, p) => (c || "").trim().toLowerCase() + "|" + (p || "");
 
 /* ---------- data ---------- */
@@ -448,7 +448,7 @@ async function getDetail(id) {
   if (DETAIL.has(id)) return DETAIL.get(id);
   try { const d = await fetch(ROOTDATA + "t/" + id + ".json").then(r => r.json()); DETAIL.set(id, d); return d; } catch (e) { return null; }
 }
-const mapsURL = (f, c, p) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([f, c, p, "Canada"].filter(Boolean).join(", "));
+const mapsURL = (f, c, p) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([f, c, p, COUNTRY.mapName].filter(Boolean).join(", "));
 function critHTML(text) {
   const lines = String(text || "").split(/\n/);
   let html = "", inList = false;
