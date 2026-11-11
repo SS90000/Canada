@@ -1,5 +1,5 @@
 {
- "built": "2026-11-11T17:05:23Z",
+ "built": "2026-11-11T17:06:46Z",
  "country": "Canada",
  "studies": 4128,
  "registryTotal": 4128,
@@ -9,12 +9,12 @@
    "sites": 3593
   },
   "neurology": {
-   "studies": 681,
-   "sites": 1610
+   "studies": 634,
+   "sites": 1461
   },
   "other": {
-   "studies": 2401,
-   "sites": 6519
+   "studies": 2435,
+   "sites": 6576
   }
  },
  "source": "ClinicalTrials.gov API v2"

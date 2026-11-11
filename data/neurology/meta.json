@@ -1,16 +1,16 @@
 {
- "built": "2026-11-11T17:05:23Z",
+ "built": "2026-11-11T17:06:46Z",
  "country": "Canada",
  "area": "neurology",
- "studies": 681,
+ "studies": 634,
  "registryTotal": 4128,
- "sites": 1610,
+ "sites": 1461,
  "categories": {
   "stroke": 113,
   "injury": 93,
   "childneuro": 38,
-  "dementia": 128,
-  "movement": 123,
+  "dementia": 117,
+  "movement": 69,
   "neuromuscular": 69,
   "sleep": 51,
   "braintumour": 61,
@@ -22,10 +22,10 @@
   "generalneuro": 7
  },
  "kinds": {
-  "obs": 141,
-  "treat": 389,
-  "diag": 19,
-  "support": 132
+  "obs": 130,
+  "treat": 361,
+  "diag": 18,
+  "support": 125
  },
  "source": "ClinicalTrials.gov API v2"
 }
