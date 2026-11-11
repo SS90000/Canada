@@ -94,7 +94,10 @@ ONC = [
     ("solid", r"solid tumou?r|advanced (?:solid )?(?:cancer|malignanc)|metastatic (?:solid )?(?:cancer|tumou?r)s?\b|any (?:solid )?tumou?r|multiple (?:cancer|tumou?r) types|pan-?tumou?r|tumou?r[- ]agnostic"),
 ]
 ONC_RE = [(k, re.compile(p, re.I)) for k, p in ONC]
-ONC_GENERIC = re.compile(r"cancer|neoplas|tumou?r(?! necrosis)|carcinoma|malignan|oncolog|leuk(?:a)?emia|lymphoma", re.I)
+ONC_GENERIC = re.compile(r"cancer|neoplas|tumou?r(?! necrosis)|carcinoma|(?<!non-)(?<!non )malignan|oncolog|leuk(?:a)?emia|lymphoma", re.I)
+# A study must first look like a cancer study; only then are the organ words above used to sort it.
+ONC_GATE = re.compile(ONC_GENERIC.pattern + r"|sarcoma|melanoma|myeloma|glioma|glioblastoma|astrocytoma|blastoma\b|ependymoma|meningioma|mesothelioma|metasta|"
+                      r"myelodysplas|myeloproliferative|myelofibrosis|polycythemia vera|hodgkin|seminoma|carcinoid|merkel|\bgist\b|waldenstr|\b(?:aml|cll|cml|mds|nsclc|sclc|hcc|rcc|dlbcl|hnscc)\b", re.I)
 # Benign growths that the generic words catch but that patients would not look for under cancer
 ONC_BENIGN = re.compile(r"^(?:(?!cancer|carcinoma|malignan|sarcoma|lymphoma|leuk|myeloma|melanoma|metasta).)*$", re.I)
 BENIGN_ONLY = re.compile(r"fibroid|leiomyoma|polyp|adenoma(?!carcinoma)|lipoma|hemangioma|nevus|neurofibroma|cyst\b|keloid|wart", re.I)
@@ -211,8 +214,9 @@ def classify(ident, conds, meshes, ancestors, healthy):
                        *conds.get("conditions", []), *conds.get("keywords", []), *meshes])
     full = base + " | " + " | ".join(ancestors)
     out = {}
-    onc = [k for k, rx in ONC_RE if rx.search(base)]
-    if not onc and ONC_GENERIC.search(base):
+    is_cancer = bool(ONC_GATE.search(base))
+    onc = [k for k, rx in ONC_RE if rx.search(base)] if is_cancer else []
+    if is_cancer and not onc:
         onc = ["general"]
     if onc and BENIGN_ONLY.search(base) and ONC_BENIGN.match(base):
         onc = []  # only benign growths (for example fibroids or polyps)
