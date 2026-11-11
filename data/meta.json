@@ -1,20 +1,20 @@
 {
- "built": "2026-11-11T16:59:31Z",
+ "built": "2026-11-11T17:00:51Z",
  "country": "Canada",
  "studies": 4128,
  "registryTotal": 4128,
  "areas": {
   "oncology": {
-   "studies": 1875,
-   "sites": 5396
+   "studies": 1132,
+   "sites": 3593
   },
   "neurology": {
    "studies": 876,
    "sites": 2184
   },
   "other": {
-   "studies": 1707,
-   "sites": 4701
+   "studies": 2265,
+   "sites": 6163
   }
  },
  "source": "ClinicalTrials.gov API v2"
