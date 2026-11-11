@@ -104,16 +104,16 @@ BENIGN_ONLY = re.compile(r"fibroid|leiomyoma|polyp|adenoma(?!carcinoma)|lipoma|h
 
 # ---------- neurology tagging: MeSH headings and plain words ----------
 NEURO = [
-    ("stroke", r"stroke|cerebrovascular|cerebral (?:infarct|hemorrhage|haemorrhage|isch)|intracerebral h|subarachnoid|intracranial (?:aneurysm|hemorrhage)|brain isch|transient ischemic|carotid stenosis|moyamoya"),
+    ("stroke", r"stroke|cerebrovascular|cerebral (?:infarct|hemorrhage|haemorrhage|isch)|intracerebral h|subarachnoid|intracranial (?:aneurysm|hemorrhage)|brain isch|transient ischemic|carotid stenosis|moyamoya|arteriovenous malformation|cavernous malformation"),
     ("epilepsy", r"epilep|seizure|status epilepticus|dravet|lennox|infantile spasm"),
     ("ms", r"multiple sclerosis|demyelinating|neuromyelitis|\bnmosd\b|optic neuritis|\bmogad\b|acute disseminated encephalomyelitis"),
-    ("movement", r"parkinson|movement disorder|dystonia|tremor|huntington|(?<!optic )ataxia|chorea|tourette|tic disorder|restless legs|progressive supranuclear|multiple system atrophy"),
+    ("movement", r"parkinson|movement disorder|dystonia|tremor|huntington|(?<!optic )ataxia|chorea|tourette|\btic disorder|restless legs|progressive supranuclear|multiple system atrophy"),
     ("dementia", r"dementia|alzheimer|cognitive (?:impairment|dysfunction|decline)|frontotemporal|lewy bod|memory (?:loss|impairment)|neurocognitive"),
     ("headache", r"migraine|headache|cluster headache|trigeminal neuralgia"),
     ("als", r"amyotrophic|\bals\b|motor neuron|spinal muscular atrophy|\bsma\b|primary lateral sclerosis"),
-    ("neuromuscular", r"neuromuscular|myasthenia|muscular dystroph|duchenne|(?<!cardio)myopath|myositis|neuropath|guillain|\bcidp\b|charcot-marie|polyneuropath|peripheral nervous system"),
+    ("neuromuscular", r"neuromuscular|myasthenia|muscular dystroph|duchenne|(?<!cardio)myopath|myositis|neuropath|guillain|\bcidp\b|charcot[- ]marie|polyneuropath|peripheral nervous system"),
     ("injury", r"brain injur|craniocerebral trauma|head injur|concussion|spinal cord injur|traumatic brain|\btbi\b"),
-    ("braintumour", r"glioma|glioblastoma|astrocytoma|medulloblastoma|ependymoma|meningioma|brain (?:tumou?r|neoplasm|metasta)|central nervous system neoplasm|leptomening|brain neoplasm"),
+    ("braintumour", r"glioma|glioblastoma|astrocytoma|medulloblastoma|ependymoma|meningioma|brain (?:tumou?r|neoplasm|metasta|cancer)|central nervous system neoplasm|leptomening|brain neoplasm"),
     ("sleep", r"sleep wake disorder|narcolepsy|insomnia|sleep apnea|hypersomnia|circadian"),
     ("childneuro", r"cerebral palsy|hydrocephalus|spina bifida|neural tube|rett|angelman|leukodystroph|neurodevelopmental disorder"),
     ("neuroinfect", r"encephalitis|meningitis|neuroinflamm|autoimmune encephal"),
@@ -214,7 +214,9 @@ def classify(ident, conds, meshes, ancestors, healthy):
                        *conds.get("conditions", []), *conds.get("keywords", []), *meshes])
     full = base + " | " + " | ".join(ancestors)
     # Sponsors' free-text keywords are noisy (schizophrenia studies list movement side effects), so neurology uses only titles, conditions and MeSH terms
-    ntext = " | ".join([ident.get("briefTitle", ""), ident.get("officialTitle", ""), *conds.get("conditions", []), *meshes])
+    # The registry sometimes maps "PD-1"/"PD-L1" keywords to "Parkinson Disease 4", so drop numbered Parkinson genes
+    ntext = " | ".join([ident.get("briefTitle", ""), ident.get("officialTitle", ""), *conds.get("conditions", []),
+                        *[m for m in meshes if not re.match(r"Parkinson Disease \d", m)]])
     out = {}
     is_cancer = bool(ONC_GATE.search(base))
     onc = [k for k, rx in ONC_RE if rx.search(base)] if is_cancer else []
