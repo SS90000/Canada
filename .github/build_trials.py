@@ -107,7 +107,7 @@ NEURO = [
     ("stroke", r"stroke|cerebrovascular|cerebral (?:infarct|hemorrhage|haemorrhage|isch)|intracerebral h|subarachnoid|intracranial (?:aneurysm|hemorrhage)|brain isch|transient ischemic|carotid stenosis|moyamoya"),
     ("epilepsy", r"epilep|seizure|status epilepticus|dravet|lennox|infantile spasm"),
     ("ms", r"multiple sclerosis|demyelinating|neuromyelitis|\bnmosd\b|optic neuritis|\bmogad\b|acute disseminated encephalomyelitis"),
-    ("movement", r"parkinson|movement disorder|dystonia|tremor|huntington|ataxia|chorea|tourette|tic disorder|restless legs|progressive supranuclear|multiple system atrophy"),
+    ("movement", r"parkinson|movement disorder|dystonia|tremor|huntington|(?<!optic )ataxia|chorea|tourette|tic disorder|restless legs|progressive supranuclear|multiple system atrophy"),
     ("dementia", r"dementia|alzheimer|cognitive (?:impairment|dysfunction|decline)|frontotemporal|lewy bod|memory (?:loss|impairment)|neurocognitive"),
     ("headache", r"migraine|headache|cluster headache|trigeminal neuralgia"),
     ("als", r"amyotrophic|\bals\b|motor neuron|spinal muscular atrophy|\bsma\b|primary lateral sclerosis"),
@@ -222,7 +222,7 @@ def classify(ident, conds, meshes, ancestors, healthy):
         onc = []  # only benign growths (for example fibroids or polyps)
     if onc:
         out["oncology"] = onc
-    neuro = [k for k, rx in NEURO_RE if rx.search(full)]
+    neuro = [k for k, rx in NEURO_RE if rx.search(base)]  # broad MeSH ancestors pulled in psychiatry, ICU and pain studies
     if len(neuro) > 1 and "generalneuro" in neuro:
         neuro.remove("generalneuro")  # only use the catch-all when nothing more specific matched
     if neuro:
