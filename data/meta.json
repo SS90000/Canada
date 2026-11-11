@@ -1,40 +1,21 @@
 {
- "built": "2026-11-11T10:17:38Z",
+ "built": "2026-11-11T16:59:31Z",
  "country": "Canada",
- "studies": 1122,
- "registryTotal": 1139,
- "sites": 3554,
- "categories": {
-  "breast": 148,
-  "prostate": 125,
-  "colorectal": 99,
-  "leukemia": 89,
-  "lymphoma": 102,
-  "myeloma": 54,
-  "childhood": 60,
-  "lung": 167,
-  "sarcoma": 47,
-  "general": 71,
-  "brain": 70,
-  "solid": 142,
-  "gyn": 114,
-  "upperGI": 40,
-  "kidney": 26,
-  "skin": 47,
-  "neuroendocrine": 19,
-  "pancreas": 67,
-  "liver": 54,
-  "headneck": 66,
-  "germcell": 12,
-  "thyroid": 10,
-  "bladder": 46,
-  "mesothelioma": 1
- },
- "kinds": {
-  "obs": 141,
-  "treat": 796,
-  "diag": 48,
-  "support": 137
+ "studies": 4128,
+ "registryTotal": 4128,
+ "areas": {
+  "oncology": {
+   "studies": 1875,
+   "sites": 5396
+  },
+  "neurology": {
+   "studies": 876,
+   "sites": 2184
+  },
+  "other": {
+   "studies": 1707,
+   "sites": 4701
+  }
  },
  "source": "ClinicalTrials.gov API v2"
 }
