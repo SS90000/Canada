@@ -35,7 +35,7 @@ en: {
   lede: "Search open clinical trials and studies for any type of cancer, near you or anywhere in Canada. See each site's status and contact, and read the full eligibility criteria, so you can raise the right studies with your care team.",
   before: "Before you start",
   b1: "This is a beta version. It is not medical advice.", b2: "Results are a first screen. Only a study team can confirm whether you can join.",
-  b3: "Study details come from ClinicalTrials.gov and can be out of date. Cancer type and disease stage are detected automatically and can be wrong.",
+  b3: "Study details may be out of date. Cancer type and disease stage are detected automatically and can be wrong.",
   b4: "Your answers stay in this browser tab. Nothing is saved or sent anywhere.", b5: "In an emergency, call 911 or go to the nearest emergency department.",
   consent: "I have read and agree to the Terms of use. I understand this is a beta, not medical advice, and that I should confirm everything with my care team.",
   readTerms: "Read the full terms of use",
@@ -88,7 +88,7 @@ fr: {
   lede: "Cherchez des essais et des études ouverts pour tout type de cancer, près de chez vous ou partout au Canada. Consultez le statut et le contact de chaque site et les critères d'admissibilité complets, pour en parler avec votre équipe soignante.",
   before: "Avant de commencer",
   b1: "Ceci est une version bêta. Ce n'est pas un avis médical.", b2: "Les résultats sont un premier tri. Seule l'équipe de l'étude peut confirmer votre admissibilité.",
-  b3: "Les détails proviennent de ClinicalTrials.gov et peuvent être dépassés. Le type de cancer et le stade sont détectés automatiquement et peuvent être erronés.",
+  b3: "Les détails des études peuvent être dépassés. Le type de cancer et le stade sont détectés automatiquement et peuvent être erronés.",
   b4: "Vos réponses restent dans cet onglet. Rien n'est enregistré ni transmis.", b5: "En cas d'urgence, composez le 911 ou rendez-vous à l'urgence la plus proche.",
   consent: "J'ai lu et j'accepte les Conditions d'utilisation. Je comprends qu'il s'agit d'une version bêta, et non d'un avis médical, et que je dois tout confirmer avec mon équipe soignante.",
   readTerms: "Lire les conditions d'utilisation complètes",
@@ -141,7 +141,7 @@ for (const [i, lg] of [[0, "en"], [1, "fr"]]) {
   x.band = (n, d) => i ? `Bêta. Ne constitue pas un avis médical. Présente les ${n} ${A.studies[1]} ayant des sites ${COUNTRY.inName[1]} sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`
                        : `Beta. Not medical advice. Lists all ${n} ${A.studies[0]} with sites ${COUNTRY.inName[0]} on ClinicalTrials.gov, updated daily (last update ${d}).`;
   x.h1 = A.h1(COUNTRY.inName)[i]; x.lede = A.lede[i];
-  x.b3 = (i ? "Les détails proviennent de ClinicalTrials.gov et peuvent être dépassés. " : "Study details come from ClinicalTrials.gov and can be out of date. ") + A.tagNote[i];
+  x.b3 = (i ? "Les détails des études peuvent être dépassés. " : "Study details may be out of date. ") + A.tagNote[i];
   x.cat = A.catLabel[i]; x.catAny = A.catAny[i]; x.prov = COUNTRY.region[i]; x.provAny = COUNTRY.regionAny[i];
   x.brand = A.brand[i];
 }
