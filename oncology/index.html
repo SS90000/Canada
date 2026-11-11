@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cancer Trial Finder</title>
+<meta name="description" content="Beta tool for finding open cancer clinical trials and studies, with site status, contacts, full eligibility criteria and a map. Not medical advice.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230f5c72'/%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M18.5 18.5l6 6' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<script>
+/* Which finder this page is. Data comes from ../data/oncology/ */
+const AREA = "oncology";
+const ROOTDATA = "../data/";
+const DATA = ROOTDATA + AREA + "/";
+</script>
+<script src="../app/settings.js"></script>
+<link rel="stylesheet" href="../app/leaflet.css">
+<link rel="stylesheet" href="../app/MarkerCluster.css">
+<link rel="stylesheet" href="../app/style.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><b id="brandName">Cancer Trial Finder</b><span id="brandSub"></span></div>
+  <span class="pill" id="demoPill">Beta</span>
+  <div class="lang" role="group" aria-label="Language" id="langGroup">
+    <button id="lang-en" aria-pressed="true" lang="en">EN</button>
+    <button id="lang-fr" aria-pressed="false" lang="fr">FR</button>
+  </div>
+</div></header>
+<div class="demo-band"><div class="wrap" id="demoBand"></div></div>
+<div class="wrap">
+  <main id="app" aria-live="polite"></main>
+  <footer>
+    <nav>
+      <button class="linkish" data-legal="terms" id="f-terms"></button>
+      <button class="linkish" data-legal="privacy" id="f-privacy"></button>
+      <button class="linkish" data-legal="data" id="f-data"></button>
+    </nav>
+    <p id="footNote"></p>
+    <p>© 2026 Salish Seven. All rights reserved.</p>
+  </footer>
+</div>
+<script src="../app/leaflet.js"></script>
+<script src="../app/leaflet.markercluster.js"></script>
+<script src="../app/country.js"></script>
+<script src="../app/areas.js"></script>
+<script src="../app/legal.js"></script>
+<script src="../app/app.js"></script>
+</body>
+</html>

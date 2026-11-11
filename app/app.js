@@ -8,30 +8,23 @@ const $ = id => document.getElementById(id);
 const km = (a, b, c, d) => { const R = 6371, r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
   const h = Math.sin(x / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
 const today = new Date();
+const MI = COUNTRY.unit === "mi";
+const toUnit = d => MI ? d * 0.621371 : d;            /* km to the display unit */
+const fromUnit = d => MI ? d / 0.621371 : d;          /* display unit to km */
+const UNIT = MI ? "mi" : "km";
 const OPEN = s => s === "R" || s === "NYR";
 const KIND_ORDER = { treat: 0, diag: 1, support: 2, obs: 3 };
 const BLOOD = new Set(["leukemia", "lymphoma", "myeloma"]);
-const MANY = new Set(["solid", "general"]);
+const MANY = A.many ? new Set(["solid", "general"]) : new Set();
 
 /* ---------- labels ---------- */
-const CAT = {
-  breast: ["Breast", "Sein"], lung: ["Lung", "Poumon"], prostate: ["Prostate", "Prostate"],
-  colorectal: ["Colorectal and anal", "Colorectal et anal"], upperGI: ["Stomach and esophagus", "Estomac et œsophage"],
-  pancreas: ["Pancreas", "Pancréas"], liver: ["Liver and bile duct", "Foie et voies biliaires"], kidney: ["Kidney", "Rein"],
-  bladder: ["Bladder and urinary tract", "Vessie et voies urinaires"], gyn: ["Gynecologic (ovary, uterus, cervix)", "Gynécologique (ovaire, utérus, col)"],
-  headneck: ["Head and neck", "Tête et cou"], thyroid: ["Thyroid", "Thyroïde"], brain: ["Brain and spinal cord", "Cerveau et moelle épinière"],
-  skin: ["Skin and melanoma", "Peau et mélanome"], leukemia: ["Leukemia and MDS", "Leucémie et SMD"], lymphoma: ["Lymphoma", "Lymphome"],
-  myeloma: ["Myeloma and plasma cell", "Myélome et plasmocytes"], sarcoma: ["Sarcoma and GIST", "Sarcome et GIST"],
-  neuroendocrine: ["Neuroendocrine", "Neuroendocrine"], germcell: ["Testicular and germ cell", "Testicule et cellules germinales"],
-  mesothelioma: ["Mesothelioma", "Mésothéliome"], childhood: ["Childhood cancers", "Cancers de l'enfant"],
-  solid: ["Open to many solid tumour types", "Ouvert à plusieurs types de tumeurs solides"], general: ["Any cancer, survivorship and supportive care", "Tout cancer, survie et soins de soutien"]
-};
+const A = AREAS[AREA];
+const CAT = A.cats;
 const KIND = { treat: ["Treatment", "Traitement"], diag: ["Diagnosis and screening", "Diagnostic et dépistage"],
   support: ["Supportive care and other", "Soins de soutien et autres"], obs: ["Observational", "Observation"] };
 const SITE = { R: ["Recruiting", "Recrute", "st-rec"], NYR: ["Coming soon", "Bientôt", "st-soon"], ANR: ["Not recruiting", "Ne recrute pas", "st-stop"],
   INV: ["By invitation only", "Sur invitation seulement", "st-stop"], SUS: ["Suspended", "Suspendu", "st-stop"], STOP: ["Closed", "Fermé", "st-stop"] };
-const PROV_FR = { "Quebec": "Québec", "British Columbia": "Colombie-Britannique", "Nova Scotia": "Nouvelle-Écosse", "New Brunswick": "Nouveau-Brunswick",
-  "Newfoundland and Labrador": "Terre-Neuve-et-Labrador", "Prince Edward Island": "Île-du-Prince-Édouard", "Northwest Territories": "Territoires du Nord-Ouest" };
+const PROV_FR = COUNTRY.regionFr || {};
 
 const T = {
 en: {
@@ -60,7 +53,7 @@ en: {
   cityAll: "All cities", atCity: c => `Showing studies in ${c}.`, clearCity: "Show all cities", seeHere: "Show studies here",
   lgR: "Recruiting", lgS: "Coming soon", lgX: "Not recruiting", studies: n => n === 1 ? "1 study" : `${n} studies`,
   more: n => `Show ${n} more`, none: "No studies match. Try a wider distance, another province, or fewer filters.",
-  nearest: "Nearest site", sitesCa: (n, r) => `${n} ${n === 1 ? "site" : "sites"} in Canada · ${r} recruiting`,
+  nearest: "Nearest site", sitesCa: (n, r) => `${n} ${n === 1 ? "site" : "sites"} ${COUNTRY.inName[0]} · ${r} recruiting`,
   ageRange: (a, b) => a == null && b == null ? "Any age" : b == null ? `Age ${a}+` : a == null ? `Up to age ${b}` : `Age ${a} to ${b}`,
   sexOnly: { F: "Women only", M: "Men only" }, healthy: "Also accepts healthy volunteers",
   extent: { early: "Early-stage", advanced: "Advanced or metastatic" }, auto: "detected automatically",
@@ -74,7 +67,7 @@ en: {
   aiNote: "Read automatically by AI from the registry text, with each point checked against the quoted wording. It can still miss or misread things. The full criteria below, and the study team, are the final word.",
   details: "Details, sites and eligibility", hide: "Hide details", save: "Save to my list", saved: "Saved", loadingD: "Loading details…",
   summaryH: "About this study", fromReg: "From the registry, in the sponsor's words:", treatments: "What is being tested",
-  allSites: "Sites in Canada", siteContact: "Site contact", noContact: "No site contact listed. Study contact:", noContact2: "No contact listed. Use the registry record.",
+  allSites: "Sites " + COUNTRY.inName[0], siteContact: "Site contact", noContact: "No site contact listed. Study contact:", noContact2: "No contact listed. Use the registry record.",
   openMap: "Map", allN: n => `Show all ${n} sites`, copy: "Copy", copied: "Copied", eligH: "Who can join (full criteria from the registry)",
   registry: "Full record on ClinicalTrials.gov", recUpd: "Record last updated", started: "Started", sponsor: "Sponsor",
   flagStale: "Status uncertain", flagPcd: d => `The estimated completion date (${d}) has passed, but the record still says open.`, flagOld: "The record hasn't been updated in more than 12 months.",
@@ -85,7 +78,7 @@ en: {
   sumEmpty: "Save studies with “Save to my list” to add them here.", copySum: "Copy summary", back: "Back to results", startOver: "Start over",
   fTerms: "Terms of use", fPriv: "Privacy", fData: "Data sources", legalBack: "Back",
   foot: () => `Operated by ${ORG.name}. Not affiliated with or endorsed by ClinicalTrials.gov, the U.S. National Library of Medicine, or any hospital or sponsor listed.`,
-  trEn: "", km: d => `${Math.round(d)} km`, kmAway: d => `${Math.round(d)} km away`
+  trEn: "", km: d => `${Math.round(toUnit(d))} ${UNIT}`, kmAway: d => `${Math.round(toUnit(d))} ${UNIT} away`
 },
 fr: {
   sub: "Canada · Tous les cancers · Bêta", pill: "Bêta",
@@ -113,7 +106,7 @@ fr: {
   cityAll: "Toutes les villes", atCity: c => `Études à ${c}.`, clearCity: "Afficher toutes les villes", seeHere: "Voir les études ici",
   lgR: "Recrute", lgS: "Bientôt", lgX: "Ne recrute pas", studies: n => n === 1 ? "1 étude" : `${n} études`,
   more: n => `Afficher ${n} de plus`, none: "Aucune étude ne correspond. Essayez une plus grande distance, une autre province ou moins de filtres.",
-  nearest: "Site le plus proche", sitesCa: (n, r) => `${n} site${n === 1 ? "" : "s"} au Canada · ${r} recrute${r === 1 ? "" : "nt"}`,
+  nearest: "Site le plus proche", sitesCa: (n, r) => `${n} site${n === 1 ? "" : "s"} ${COUNTRY.inName[1]} · ${r} recrute${r === 1 ? "" : "nt"}`,
   ageRange: (a, b) => a == null && b == null ? "Tout âge" : b == null ? `${a} ans et plus` : a == null ? `Jusqu'à ${b} ans` : `${a} à ${b} ans`,
   sexOnly: { F: "Femmes seulement", M: "Hommes seulement" }, healthy: "Accepte aussi des volontaires en santé",
   extent: { early: "Stade précoce", advanced: "Avancé ou métastatique" }, auto: "détecté automatiquement",
@@ -127,7 +120,7 @@ fr: {
   aiNote: "Lu automatiquement par l'IA à partir du texte du registre (en anglais), chaque point étant vérifié par rapport au passage cité. Des erreurs restent possibles. Les critères complets ci-dessous et l'équipe de l'étude font foi.",
   details: "Détails, sites et admissibilité", hide: "Masquer les détails", save: "Ajouter à ma liste", saved: "Ajoutée", loadingD: "Chargement des détails…",
   summaryH: "À propos de cette étude", fromReg: "Selon le registre, dans les mots du promoteur (en anglais) :", treatments: "Ce qui est étudié",
-  allSites: "Sites au Canada", siteContact: "Contact du site", noContact: "Aucun contact de site. Contact de l'étude :", noContact2: "Aucun contact indiqué. Consultez la fiche du registre.",
+  allSites: "Sites " + COUNTRY.inName[1], siteContact: "Contact du site", noContact: "Aucun contact de site. Contact de l'étude :", noContact2: "Aucun contact indiqué. Consultez la fiche du registre.",
   openMap: "Carte", allN: n => `Afficher les ${n} sites`, copy: "Copier", copied: "Copié", eligH: "Qui peut participer (critères complets du registre, en anglais)",
   registry: "Fiche complète sur ClinicalTrials.gov", recUpd: "Dernière mise à jour de la fiche", started: "Début", sponsor: "Promoteur",
   flagStale: "Statut incertain", flagPcd: d => `La date d'achèvement prévue (${d}) est passée, mais la fiche indique encore que l'étude est ouverte.`, flagOld: "La fiche n'a pas été mise à jour depuis plus de 12 mois.",
@@ -138,13 +131,25 @@ fr: {
   sumEmpty: "Ajoutez des études avec « Ajouter à ma liste » pour les voir ici.", copySum: "Copier le résumé", back: "Retour aux résultats", startOver: "Recommencer",
   fTerms: "Conditions d'utilisation", fPriv: "Confidentialité", fData: "Sources des données", legalBack: "Retour",
   foot: () => `Exploité par ${ORG.name}. Non affilié à ClinicalTrials.gov, à la National Library of Medicine des États-Unis, ni à aucun hôpital ou promoteur mentionné, et non approuvé par eux.`,
-  trEn: "Les détails des études (titres, résumés, critères, noms de sites) sont affichés en anglais, comme dans le registre.", km: d => `${Math.round(d)} km`, kmAway: d => `à ${Math.round(d)} km`
+  trEn: "Les détails des études (titres, résumés, critères, noms de sites) sont affichés en anglais, comme dans le registre.", km: d => `${Math.round(toUnit(d))} ${UNIT}`, kmAway: d => `à ${Math.round(toUnit(d))} ${UNIT}`
 }};
+
+/* area and country wording */
+for (const [i, lg] of [[0, "en"], [1, "fr"]]) {
+  const x = T[lg];
+  x.sub = `${COUNTRY.name[i]} · ${A.short[i]} · ${i ? "Bêta" : "Beta"}`;
+  x.band = (n, d) => i ? `Bêta. Ne constitue pas un avis médical. Présente les ${n} ${A.studies[1]} ayant des sites ${COUNTRY.inName[1]} sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`
+                       : `Beta. Not medical advice. Lists all ${n} ${A.studies[0]} with sites ${COUNTRY.inName[0]} on ClinicalTrials.gov, updated daily (last update ${d}).`;
+  x.h1 = A.h1(COUNTRY.name)[i]; x.lede = A.lede[i];
+  x.b3 = (i ? "Les détails proviennent de ClinicalTrials.gov et peuvent être dépassés. " : "Study details come from ClinicalTrials.gov and can be out of date. ") + A.tagNote[i];
+  x.cat = A.catLabel[i]; x.catAny = A.catAny[i]; x.prov = COUNTRY.region[i]; x.provAny = COUNTRY.regionAny[i];
+  x.brand = A.brand[i];
+}
 
 /* ---------- state ---------- */
 const S = { lang: "en", view: "gate", consent: false, legal: "terms", prev: "gate", sort: "best", shown: 20, city: null,
   saved: new Set(), open: new Set(), showHidden: false,
-  f: { cat: "", many: true, prov: "", near: "", lat: null, lon: null, loc: false, dist: "100", age: "", sex: "", spread: "", stage: "", kinds: { treat: true, diag: true, support: true, obs: true }, closed: false } };
+  f: { cat: "", many: A.many, prov: "", near: "", lat: null, lon: null, loc: false, dist: "100", age: "", sex: "", spread: "", stage: "", kinds: { treat: true, diag: true, support: true, obs: true }, closed: false } };
 let ROWS = [], META = null, EIDX = {}, ELIG = new Map(), CITIES = new Map(), PROVS = [], DETAIL = new Map(), LIVE = null;
 const t = k => T[S.lang][k];
 const LG = pair => pair[S.lang === "fr" ? 1 : 0];
@@ -156,10 +161,11 @@ const cityKey = (c, p) => (c || "").trim().toLowerCase() + "|" + (p || "");
 /* ---------- data ---------- */
 async function load() {
   try {
-    const [rows, meta] = await Promise.all([fetch(DATA + "index.json").then(r => { if (!r.ok) throw 0; return r.json(); }),
+    const [idx, meta] = await Promise.all([fetch(DATA + "index.json").then(r => { if (!r.ok) throw 0; return r.json(); }),
                                             fetch(DATA + "meta.json").then(r => r.ok ? r.json() : null)]);
-    ROWS = rows; META = meta;
-    try { EIDX = await fetch(DATA + "e/_index.json").then(r => r.ok ? r.json() : {}); } catch (e) { EIDX = {}; }
+    ROWS = idx.rows; META = meta;
+    for (const r of ROWS) { r.x = r.x || []; r.s = r.s.map(([fi, ci, st]) => { const c = idx.cities[ci]; return [idx.fac[fi], c[0], c[1], st, c[2], c[3]]; }); }
+    try { EIDX = await fetch(ROOTDATA + "e/_index.json").then(r => r.ok ? r.json() : {}); } catch (e) { EIDX = {}; }
     for (const r of ROWS) { const x = EIDX[r.id]; r.ai = x && x.u === r.upd ? x : null; }
     const acc = new Map();
     for (const r of ROWS) for (const s of r.s) {
@@ -185,7 +191,7 @@ function areaSites(r) {
   let sites = r.s.map((s, i) => ({ s, i, d: null }));
   if (S.city) sites = sites.filter(x => cityKey(x.s[1], x.s[2]) === S.city);
   else if (f.lat != null && f.dist !== "any") {
-    const lim = +f.dist;
+    const lim = fromUnit(+f.dist);
     sites = sites.filter(x => x.s[4] != null && (x.d = km(f.lat, f.lon, x.s[4], x.s[5])) <= lim);
   } else if (f.prov) sites = sites.filter(x => x.s[2] === f.prov);
   if (f.lat != null) for (const x of sites) if (x.d == null && x.s[4] != null) x.d = km(f.lat, f.lon, x.s[4], x.s[5]);
@@ -241,7 +247,8 @@ function results() {
 const app = $("app");
 function render(keepScroll) {
   document.documentElement.lang = S.lang;
-  $("brandSub").textContent = t("sub"); $("demoPill").textContent = t("pill");
+  $("brandName").textContent = t("brand"); document.title = t("brand"); $("brandSub").textContent = t("sub");
+  $("langGroup").hidden = COUNTRY.langs.length < 2; if (COUNTRY.langs.length < 2) S.lang = "en"; $("demoPill").textContent = t("pill");
   $("demoBand").textContent = META ? t("band")(META.studies, fmtDate(META.built.slice(0, 10))) : t("loading");
   $("f-terms").textContent = t("fTerms"); $("f-privacy").textContent = t("fPriv"); $("f-data").textContent = t("fData");
   $("footNote").textContent = t("foot")();
@@ -257,25 +264,25 @@ function formHTML(compact) {
   const counts = {}; for (const r of ROWS) for (const c of r.c) counts[c] = (counts[c] || 0) + 1;
   const catOpts = cats.map(k => [k, LG(CAT[k])]).sort((a, b) => a[1].localeCompare(b[1], S.lang))
     .map(([k, l]) => `<option value="${k}" ${f.cat === k ? "selected" : ""}>${esc(l)} (${counts[k] || 0})</option>`).join("");
-  const dists = ["25", "50", "100", "250", "500", "any"];
+  const dists = [...COUNTRY.dists.map(String), "any"];
   const cityList = [...CITIES.values()].sort((a, b) => b.studies - a.studies).map(c => `<option value="${esc(c.name)}, ${esc(provName(c.prov))}">`).join("");
   return `<form id="sform" class="sform${compact ? " compact" : ""}" novalidate>
    <fieldset class="grp"><legend>${esc(t("cat"))}</legend>
     <label class="sr" for="f-cat">${esc(t("cat"))}</label>
     <select id="f-cat"><option value="">${esc(t("catAny"))}</option>${catOpts}</select>
-    <label class="chk" for="f-many"><input type="checkbox" id="f-many" ${f.many ? "checked" : ""}> ${esc(t("many"))}</label></fieldset>
+    ${A.many ? `<label class="chk" for="f-many"><input type="checkbox" id="f-many" ${f.many ? "checked" : ""}> ${esc(t("many"))}</label>` : ""}</fieldset>
    <fieldset class="grp"><legend>${esc(t("where"))}</legend>
     <div class="two"><div><label for="f-near">${esc(t("near"))}</label>
       <input id="f-near" list="f-cities" autocomplete="off" placeholder="${esc(t("nearPh"))}" value="${esc(f.loc ? t("locOn") : f.near)}"><datalist id="f-cities">${cityList}</datalist></div>
-     <div><label for="f-dist">${esc(t("dist"))}</label><select id="f-dist">${dists.map(d => `<option value="${d}" ${f.dist === d ? "selected" : ""}>${d === "any" ? esc(t("distAny")) : d + " km"}</option>`).join("")}</select></div></div>
+     <div><label for="f-dist">${esc(t("dist"))}</label><select id="f-dist">${dists.map(d => `<option value="${d}" ${f.dist === d ? "selected" : ""}>${d === "any" ? esc(t("distAny")) : d + " " + UNIT}</option>`).join("")}</select></div></div>
     <button type="button" class="linkish" id="f-loc">${esc(t("useLoc"))}</button> <span class="help" id="locMsg" role="status"></span>
     <label for="f-prov">${esc(t("prov"))}</label>
     <select id="f-prov" ${f.lat != null ? "disabled" : ""}><option value="">${esc(t("provAny"))}</option>${PROVS.map(p => `<option value="${esc(p)}" ${f.prov === p ? "selected" : ""}>${esc(provName(p))}</option>`).join("")}</select></fieldset>
    <fieldset class="grp"><legend>${esc(t("about"))}</legend>
     <div class="three"><div><label for="f-age">${esc(t("age"))}</label><input id="f-age" type="number" min="0" max="120" inputmode="numeric" value="${esc(f.age)}"></div>
      <div><label for="f-sex">${esc(t("sex"))}</label><select id="f-sex"><option value="">${esc(t("sexAny"))}</option><option value="F" ${f.sex === "F" ? "selected" : ""}>${esc(t("female"))}</option><option value="M" ${f.sex === "M" ? "selected" : ""}>${esc(t("male"))}</option></select></div>
-     <div><label for="f-stage">${esc(t("stage"))}</label><select id="f-stage"><option value="">${esc(t("stageAny"))}</option>${["0", "I", "IA", "IB", "II", "IIA", "IIB", "III", "IIIA", "IIIB", "IIIC", "IV"].map(x => `<option value="${x}" ${f.stage === x ? "selected" : ""}>${esc(t("stageN")(x))}</option>`).join("")}</select></div>
-     <div><label for="f-spread">${esc(t("spread"))}</label><select id="f-spread"><option value="">${esc(t("spreadAny"))}</option><option value="early" ${f.spread === "early" ? "selected" : ""}>${esc(t("early"))}</option><option value="advanced" ${f.spread === "advanced" ? "selected" : ""}>${esc(t("advanced"))}</option></select></div></div></fieldset>
+     ${A.stage ? `<div><label for="f-stage">${esc(t("stage"))}</label><select id="f-stage"><option value="">${esc(t("stageAny"))}</option>${["0", "I", "IA", "IB", "II", "IIA", "IIB", "III", "IIIA", "IIIB", "IIIC", "IV"].map(x => `<option value="${x}" ${f.stage === x ? "selected" : ""}>${esc(t("stageN")(x))}</option>`).join("")}</select></div>
+     <div><label for="f-spread">${esc(t("spread"))}</label><select id="f-spread"><option value="">${esc(t("spreadAny"))}</option><option value="early" ${f.spread === "early" ? "selected" : ""}>${esc(t("early"))}</option><option value="advanced" ${f.spread === "advanced" ? "selected" : ""}>${esc(t("advanced"))}</option></select></div>` : ""}</div></fieldset>
    <fieldset class="grp"><legend>${esc(t("types"))}</legend><div class="chips">
     ${Object.keys(KIND).map(k => `<label class="chk" for="f-k-${k}"><input type="checkbox" id="f-k-${k}" ${f.kinds[k] ? "checked" : ""}> ${esc(LG(KIND[k]))}</label>`).join("")}</div>
     <label class="chk" for="f-closed"><input type="checkbox" id="f-closed" ${f.closed ? "checked" : ""}> ${esc(t("closed"))}</label></fieldset>
@@ -284,8 +291,8 @@ function formHTML(compact) {
 }
 function readForm() {
   const f = S.f;
-  f.cat = $("f-cat").value; f.many = $("f-many").checked; f.dist = $("f-dist").value;
-  f.age = $("f-age").value; f.sex = $("f-sex").value; f.spread = $("f-spread").value; f.stage = $("f-stage").value; f.closed = $("f-closed").checked;
+  f.cat = $("f-cat").value; f.many = A.many && !!$("f-many")?.checked; f.dist = $("f-dist").value;
+  f.age = $("f-age").value; f.sex = $("f-sex").value; f.spread = $("f-spread")?.value || ""; f.stage = $("f-stage")?.value || ""; f.closed = $("f-closed").checked;
   for (const k of Object.keys(KIND)) f.kinds[k] = $("f-k-" + k).checked;
   const near = $("f-near").value.trim();
   if (f.loc && near === t("locOn")) { /* keep device location */ }
@@ -422,7 +429,7 @@ function bindCards() {
 }
 async function getElig(id) {
   if (ELIG.has(id)) return ELIG.get(id);
-  try { const d = await fetch(DATA + "e/" + id + ".json").then(r => r.json()); ELIG.set(id, d); return d; } catch (e) { return null; }
+  try { const d = await fetch(ROOTDATA + "e/" + id + ".json").then(r => r.json()); ELIG.set(id, d); return d; } catch (e) { return null; }
 }
 function aiHTML(id) {
   const a = ELIG.get(id); if (!a) return "";
@@ -439,7 +446,7 @@ function aiHTML(id) {
 }
 async function getDetail(id) {
   if (DETAIL.has(id)) return DETAIL.get(id);
-  try { const d = await fetch(DATA + "t/" + id + ".json").then(r => r.json()); DETAIL.set(id, d); return d; } catch (e) { return null; }
+  try { const d = await fetch(ROOTDATA + "t/" + id + ".json").then(r => r.json()); DETAIL.set(id, d); return d; } catch (e) { return null; }
 }
 const mapsURL = (f, c, p) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent([f, c, p, "Canada"].filter(Boolean).join(", "));
 function critHTML(text) {
@@ -554,10 +561,10 @@ function startLiveMap() {
       .bindPopup(`<div class="lpop"><b>${esc(c.name)}</b><small>${esc(provName(c.prov))}</small><span>${esc(t("studies")(a.n))} · ${esc(t({ rec: "lgR", soon: "lgS", stop: "lgX" }[a.cls]))}</span><button class="btn small" data-city-go="${esc(c.k)}">${esc(t("seeHere"))}</button></div>`);
   }
   if (group) map.addLayer(group);
-  map.setView([56, -96], 3);
+  map.setView(COUNTRY.center, COUNTRY.zoom);
   let touched = false, lw = 0, lh = 0;
   function fit() { if (LIVE !== map) return; const z = map.getSize(); if (z.x < 50 || z.y < 50) return;
-    if (S.f.lat != null && !S.city && S.f.dist !== "any") map.fitBounds(window.L.latLng(S.f.lat, S.f.lon).toBounds(+S.f.dist * 2000), { padding: [20, 20], animate: false });
+    if (S.f.lat != null && !S.city && S.f.dist !== "any") map.fitBounds(window.L.latLng(S.f.lat, S.f.lon).toBounds(fromUnit(+S.f.dist) * 2000), { padding: [20, 20], animate: false });
     else if (pts.length === 1) map.setView(pts[0], 11, { animate: false }); else map.fitBounds(pts, { padding: [30, 30], maxZoom: 11, animate: false }); }
   ["mousedown", "touchstart", "wheel", "keydown"].forEach(ev => box.addEventListener(ev, () => { touched = true; }, { passive: true }));
   if (window.ResizeObserver) { const ro = new ResizeObserver(() => { if (LIVE !== map) { ro.disconnect(); return; } const w = box.clientWidth, h = box.clientHeight; if (w === lw && h === lh) return; lw = w; lh = h; map.invalidateSize(); if (!touched) fit(); }); ro.observe(box); map.on("unload", () => ro.disconnect()); }
@@ -583,8 +590,8 @@ function buildSummary() {
   });
   lines.push("");
   lines.push(fr ? "QUESTIONS POUR MON ONCOLOGUE" : "QUESTIONS FOR MY ONCOLOGIST");
-  (fr ? ["Une de ces études est-elle adaptée à ma situation?", "Mon type et mon stade de cancer correspondent-ils à leurs critères?", "Participer retarderait-il mon traitement habituel?", "Pouvez-vous me diriger vers l'équipe de l'étude ou un(e) infirmier(ère) de recherche?", "Y a-t-il d'autres études à envisager?"]
-      : ["Is any of these studies a good fit for my situation?", "Do my cancer type and stage match their criteria?", "Would taking part delay my usual treatment?", "Can you refer me to the study team or a research nurse?", "Are there other studies I should consider?"]).forEach(q => lines.push("- " + q));
+  (fr ? ["Une de ces études est-elle adaptée à ma situation?", (A.stage ? "Mon type et mon stade de cancer correspondent-ils à leurs critères?" : "Ma situation correspond-elle à leurs critères?"), "Participer retarderait-il mon traitement habituel?", "Pouvez-vous me diriger vers l'équipe de l'étude ou un(e) infirmier(ère) de recherche?", "Y a-t-il d'autres études à envisager?"]
+      : ["Is any of these studies a good fit for my situation?", (A.stage ? "Do my cancer type and stage match their criteria?" : "Does my condition match their criteria?"), "Would taking part delay my usual treatment?", "Can you refer me to the study team or a research nurse?", "Are there other studies I should consider?"]).forEach(q => lines.push("- " + q));
   return lines.join("\n");
 }
 async function vSummary() {

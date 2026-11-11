@@ -91,7 +91,7 @@ def main():
 
 def queue(n):
     """Print up to n trial IDs that still need reading (newest records first)."""
-    rows = json.load(open(os.path.join(ROOT, "index.json"), encoding="utf-8"))
+    rows = json.load(open(os.path.join(ROOT, "oncology", "index.json"), encoding="utf-8"))["rows"]  # AI reading is for oncology for now
     done = {}
     ip = os.path.join(E, "_index.json")
     if os.path.exists(ip):

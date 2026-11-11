@@ -1,7 +1,11 @@
-# Cancer Trial Finder
+# Clinical Trial Finder · Canada (beta)
 
-Demonstration tool for finding breast cancer clinical trials and studies in Toronto, by Salish Seven.
+Patient-facing finders for open clinical trials with sites in Canada, by Salish Seven.
 
-Live page: https://ss90000.github.io/SS2/
+- Landing page: https://ss90000.github.io/Canada/
+- Cancer: https://ss90000.github.io/Canada/oncology/
+- Neurological conditions: https://ss90000.github.io/Canada/neurology/
+- Other conditions: https://ss90000.github.io/Canada/other/
 
-Trial data from ClinicalTrials.gov, retrieved 3 November 2026. Not medical advice.
+Data comes from ClinicalTrials.gov and is rebuilt daily by `.github/workflows/update-trials.yml`.
+Not medical advice.

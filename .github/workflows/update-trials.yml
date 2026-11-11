@@ -20,13 +20,15 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download open cancer trials with Canadian sites from ClinicalTrials.gov
+      - name: Download open studies with sites in this country from ClinicalTrials.gov
         id: build
         continue-on-error: true    # still save the log if the download fails
+        env:
+          TRIAL_COUNTRY: "Canada"
         run: python3 .github/build_trials.py
 
       - name: Save the update
