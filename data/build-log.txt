@@ -1,7 +1,7 @@
-2026-11-11 17:06:26 UTC  Registry reports 4128 open studies with a site in Canada
-2026-11-11 17:06:46 UTC  Downloaded 4128 study records; 47 detail files new or changed
-2026-11-11 17:06:46 UTC  Filled in the region for 357 sites from their city
-2026-11-11 17:06:46 UTC  oncology: 1132 studies at 3593 sites; lung 167, breast 148, solid 141, prostate 126, gyn 114, lymphoma 103, colorectal 97, leukemia 95, general 78, brain 68, pancreas 66, headneck 66, childhood 57, liver 56, myeloma 53, sarcoma 47, skin 47, bladder 46, upperGI 43, kidney 28, neuroendocrine 18, germcell 12, thyroid 8, mesothelioma 1
-2026-11-11 17:06:46 UTC  neurology: 634 studies at 1461 sites; dementia 117, stroke 113, injury 93, movement 69, neuromuscular 69, braintumour 61, sleep 51, childneuro 38, ms 28, headache 23, epilepsy 22, als 20, generalneuro 7, neuroinfect 3
-2026-11-11 17:06:46 UTC  other: 2435 studies at 6576 sites; heart 487, musculoskeletal 441, pain 407, mental 353, metabolic 326, skin 284, immune 278, women 277, lung 257, genetic 206, digestive 197, infection 195, general 176, kidney 161, healthy 119, eyeent 110, blood 86
-2026-11-11 17:06:46 UTC  Wrote 4128 studies; removed 0 closed studies
+2026-11-12 10:22:42 UTC  Registry reports 4128 open studies with a site in Canada
+2026-11-12 10:23:01 UTC  Downloaded 4128 study records; 0 detail files new or changed
+2026-11-12 10:23:01 UTC  Filled in the region for 357 sites from their city
+2026-11-12 10:23:01 UTC  oncology: 1132 studies at 3593 sites; lung 167, breast 148, solid 141, prostate 126, gyn 114, lymphoma 103, colorectal 97, leukemia 95, general 78, brain 68, pancreas 66, headneck 66, childhood 57, liver 56, myeloma 53, sarcoma 47, skin 47, bladder 46, upperGI 43, kidney 28, neuroendocrine 18, germcell 12, thyroid 8, mesothelioma 1
+2026-11-12 10:23:01 UTC  neurology: 634 studies at 1461 sites; dementia 117, stroke 113, injury 93, movement 69, neuromuscular 69, braintumour 61, sleep 51, childneuro 38, ms 28, headache 23, epilepsy 22, als 20, generalneuro 7, neuroinfect 3
+2026-11-12 10:23:01 UTC  other: 2435 studies at 6576 sites; heart 487, musculoskeletal 441, pain 407, mental 353, metabolic 326, skin 284, immune 278, women 277, lung 257, genetic 206, digestive 197, infection 195, general 176, kidney 161, healthy 119, eyeent 110, blood 86
+2026-11-12 10:23:01 UTC  Wrote 4128 studies; removed 0 closed studies
