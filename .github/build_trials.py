@@ -16,7 +16,7 @@ Output (all under data/):
 
 Only the Python standard library is used, so the GitHub Action needs no installs.
 """
-import html, io, json, os, re, sys, time, unicodedata, urllib.parse, urllib.request, zipfile
+import html, json, os, re, sys, time, unicodedata, urllib.parse, urllib.request
 from datetime import datetime, timezone
 
 API = "https://clinicaltrials.gov/api/v2/studies"
@@ -212,7 +212,7 @@ def contact_of(c):
 
 
 # ---------- rare diseases: names and synonyms from Orphanet's nomenclature ----------
-ORPHA_URL = "https://www.orphadata.com/data/nomenclature/packs/Orphanet_Nomenclature_Pack_EN.zip"
+ORPHA_URL = "https://www.orphadata.com/data/xml/en_product1.xml"  # Orphanet nomenclature, CC BY 4.0
 ORPHA_CACHE = os.path.join(OUT, "_ref", "orpha_names.json")
 # Orphanet names that are also everyday words in registry conditions; matching them adds noise
 RARE_STOP = {"disease", "syndrome", "malformation syndrome", "clinical group", "disorder", "tumor", "tumour", "cancer",
@@ -238,17 +238,14 @@ def load_rare_names():
         pass
     try:
         with urllib.request.urlopen(urllib.request.Request(ORPHA_URL, headers=UA), timeout=180) as r:
-            z = zipfile.ZipFile(io.BytesIO(r.read()))
+            text = r.read().decode("utf-8", "ignore")
         names = set()
-        for fn in z.namelist():
-            if not fn.lower().endswith(".xml"):
-                continue
-            text = z.read(fn).decode("utf-8", "ignore")
-            for tag in ("Name", "Synonym"):
-                for m in re.finditer(rf'<{tag} lang="en">([^<]+)</{tag}>', text):
-                    n = norm_name(html.unescape(m.group(1)))
-                    if n and n not in RARE_STOP and (" " in n or len(n) >= 8):
-                        names.add(n)
+        found = [m.group(1) for m in re.finditer(r'<OrphaCode>\d+</OrphaCode>[\s\S]{0,400}?<Name lang="en">([^<]+)</Name>', text)]
+        found += re.findall(r'<Synonym lang="en">([^<]+)</Synonym>', text)
+        for raw in found:
+            n = norm_name(html.unescape(raw))
+            if n and n not in RARE_STOP and (" " in n or len(n) >= 8):
+                names.add(n)
         if len(names) < 3000:
             raise RuntimeError(f"only {len(names)} names found")
         os.makedirs(os.path.dirname(ORPHA_CACHE), exist_ok=True)
@@ -295,7 +292,7 @@ HC_STATUS = {"2714": "R", "2693": "NYR"}  # Recruiting, Not yet recruiting
 
 def hc_trials():
     """Scrape Health Canada's portal for open trials. Returns (by_nct, no_registry_count)."""
-    by_nct, noreg = {}, 0
+    by_nct, noreg = {}, set()
     for st, code in HC_STATUS.items():
         pg, total = 0, None
         while True:
@@ -311,8 +308,8 @@ def hc_trials():
             if page is None:
                 raise RuntimeError("Health Canada portal did not respond")
             if total is None:
-                m = re.search(r"of\s+([\d,]+)\s+trials", page)
-                total = int(m.group(1).replace(",", "")) if m else 0
+                m = re.search(r"of\s*(?:<[^>]*>\s*)*([\d,]+)\s*(?:<[^>]*>\s*)*trials", page)
+                total = int(m.group(1).replace(",", "")) if m else None
             blocks = re.split(r'<div class="views-row">', page)[1:]
             for b in blocks:
                 ctrl = re.search(r'href="/en/clinical-trial/(\d+)[^"]*"', b)
@@ -320,15 +317,15 @@ def hc_trials():
                     continue
                 ids = sorted(set(re.findall(r"NCT\d{8}", b)))
                 if not ids and not re.search(r"views-field-field-nct-id[\s\S]*?<a ", b):
-                    noreg += 1
+                    noreg.add(ctrl.group(1))
                 for n in ids:
                     by_nct.setdefault(n, {"ctrl": ctrl.group(1), "st": code})
             pg += 1
-            if pg * 10 >= total or not blocks:
+            if not any('/en/clinical-trial/' in b for b in blocks) or pg >= 600 or (total and pg * 10 >= total):
                 break
             time.sleep(0.3)
-        log(f"Health Canada portal: {total} trials with status {code}")
-    return by_nct, noreg
+        log(f"Health Canada portal: {total} trials with status {code} ({pg} pages read)")
+    return by_nct, len(noreg)
 
 
 def not_included_counts():
