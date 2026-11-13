@@ -1,16 +1,16 @@
-2026-11-13 16:15:46 UTC  Could not refresh Orphanet names (HTTP Error 404: Not Found); using the cached list if there is one
-2026-11-13 16:15:46 UTC  Rare-disease name list: 0 names
-2026-11-13 16:15:46 UTC  Registry reports 4128 open studies with a site in Canada
-2026-11-13 16:16:10 UTC  Downloaded 4128 study records; 71 detail files new or changed
-2026-11-13 16:16:11 UTC  Health Canada portal: 0 trials with status R
-2026-11-13 16:16:12 UTC  Health Canada portal: 0 trials with status NYR
-2026-11-13 16:16:12 UTC  Health Canada lists 13 open trials with a ClinicalTrials.gov number; 5 are not in the registry download (no Canadian site listed, or a different status); 6 have no registry record
-2026-11-13 16:16:13 UTC  Added 5 Health Canada-authorized trials whose Canadian sites are not listed yet
-2026-11-13 16:16:13 UTC  Left out (not open to new participants): ACTIVE_NOT_RECRUITING 2237, ENROLLING_BY_INVITATION 198, SUSPENDED 103
-2026-11-13 16:16:13 UTC  Most frequent rare-disease matches: 
-2026-11-13 16:16:13 UTC  Filled in the region for 357 sites from their city
-2026-11-13 16:16:13 UTC  oncology: 1136 studies at 3601 sites; lung 167, breast 149, solid 142, prostate 126, gyn 114, lymphoma 104, colorectal 97, leukemia 96, general 78, brain 69, pancreas 66, headneck 66, childhood 59, liver 56, myeloma 53, skin 48, bladder 47, sarcoma 46, upperGI 43, kidney 28, neuroendocrine 18, germcell 12, thyroid 8, mesothelioma 1
-2026-11-13 16:16:13 UTC  neurology: 639 studies at 1468 sites; dementia 118, stroke 114, injury 93, movement 69, neuromuscular 69, braintumour 62, sleep 51, childneuro 39, ms 28, epilepsy 23, headache 23, als 20, generalneuro 7, neuroinfect 3
-2026-11-13 16:16:13 UTC  other: 2432 studies at 6599 sites; heart 486, musculoskeletal 437, pain 407, mental 351, metabolic 325, skin 282, immune 281, women 277, lung 258, genetic 206, digestive 197, infection 196, general 176, kidney 162, healthy 118, eyeent 110, blood 86
-2026-11-13 16:16:13 UTC  rare: 13 studies at 38 sites; genetic 8, kidney 6, skin 6, rarecancer 5, metabolic 4, lung 4, musculoskeletal 3, digestive 3, eyeent 2, rareneuro 2, heart 1, immune 1
-2026-11-13 16:16:13 UTC  Wrote 4133 studies; removed 4 closed studies
+2026-11-13 16:25:00 UTC  Loaded 24651 rare-disease names from Orphanet
+2026-11-13 16:25:00 UTC  Rare-disease name list: 24651 names
+2026-11-13 16:25:01 UTC  Registry reports 4128 open studies with a site in Canada
+2026-11-13 16:25:31 UTC  Downloaded 4128 study records; 810 detail files new or changed
+2026-11-13 16:29:07 UTC  Health Canada portal: 1445 trials with status R (145 pages read)
+2026-11-13 16:30:14 UTC  Health Canada portal: 563 trials with status NYR (57 pages read)
+2026-11-13 16:30:14 UTC  Health Canada lists 1552 open trials with a ClinicalTrials.gov number; 293 are not in the registry download (no Canadian site listed, or a different status); 383 have no registry record
+2026-11-13 16:30:16 UTC  Added 279 Health Canada-authorized trials whose Canadian sites are not listed yet
+2026-11-13 16:30:17 UTC  Left out (not open to new participants): ACTIVE_NOT_RECRUITING 2237, ENROLLING_BY_INVITATION 198, SUSPENDED 103
+2026-11-13 16:30:17 UTC  Most frequent rare-disease matches: small cell lung cancer 127, multiple myeloma 109, amyloidosis 49, hodgkin lymphoma 47, hemophilia 47, scleroderma 43, hepatocellular carcinoma 40, non hodgkin lymphoma 39, glioblastoma 37, squamous cell carcinoma of head and neck 35, renal cell carcinoma 35, spinal cord injury 34, systemic lupus erythematosus 32, muscular dystrophy 32, amyotrophic lateral sclerosis 31, acute myeloid leukemia 30, vasculitis 30, hemophilia a 29, astrocytoma 29, follicular lymphoma 29, neuroblastoma 28, myasthenia gravis 27, frontotemporal dementia 26, polycythemia 26, cystic fibrosis 25, idiopathic pulmonary fibrosis 22, alopecia 21, diffuse large b cell lymphoma 20, narcolepsy 20, acute lymphoblastic leukemia 19, head and neck squamous cell carcinoma 18, pulmonary arterial hypertension 18, mantle cell lymphoma 18, polycythemia vera 18, chronic lymphocytic leukemia 18, myotonic dystrophy 17, interstitial lung disease 16, medulloblastoma 16, diffuse intrinsic pontine glioma 15, sickle cell anemia 15
+2026-11-13 16:30:17 UTC  Filled in the region for 357 sites from their city
+2026-11-13 16:30:17 UTC  oncology: 1247 studies at 3601 sites; lung 184, solid 162, breast 159, prostate 134, gyn 130, lymphoma 121, leukemia 114, colorectal 102, general 79, brain 76, pancreas 74, headneck 72, childhood 64, myeloma 59, skin 57, liver 57, bladder 53, upperGI 48, sarcoma 47, kidney 31, neuroendocrine 19, germcell 12, thyroid 8, mesothelioma 1
+2026-11-13 16:30:17 UTC  neurology: 685 studies at 1468 sites; dementia 123, stroke 120, injury 94, neuromuscular 81, movement 74, braintumour 67, sleep 55, childneuro 42, ms 32, epilepsy 25, headache 23, als 22, generalneuro 7, neuroinfect 4
+2026-11-13 16:30:17 UTC  other: 2554 studies at 6599 sites; heart 507, musculoskeletal 445, pain 414, mental 355, metabolic 345, immune 310, skin 300, lung 287, women 286, genetic 234, digestive 213, infection 205, general 183, kidney 172, eyeent 122, healthy 118, blood 104
+2026-11-13 16:30:17 UTC  rare: 946 studies at 2574 sites; rarecancer 449, immune 249, blood 245, genetic 225, rareneuro 207, lung 202, skin 163, musculoskeletal 160, heart 153, metabolic 122, digestive 103, kidney 71, infection 49, eyeent 48, raregeneral 19
+2026-11-13 16:30:17 UTC  Wrote 4407 studies; removed 0 closed studies
