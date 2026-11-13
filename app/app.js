@@ -501,7 +501,7 @@ function detailHTML(id, e) {
      ${iv.length ? `<p class="eyebrow">${esc(t("treatments"))}</p><ul class="facts">${iv.map(x => `<li lang="en">${x}</li>`).join("")}</ul>` : ""}</div>
     ${d.hc ? `<div class="dsec"><p class="eyebrow">${esc(t("allSites"))} (0)</p><p class="help">${esc(t("hcFlagP"))}</p>
       ${central.length ? `<p><small>${esc(t("noContact"))}</small> <code>${esc(central[0])}</code> <button class="btn ghost small" data-copy="${esc(central[0])}">${esc(t("copy"))}</button></p>` : ""}
-      <p><a href="https://clinical-trials-search.canada.ca/${S.lang === "fr" ? "fr" : "en"}/clinical-trial/${esc(d.hc)}" target="_blank" rel="noopener">${esc(t("hcLink"))}</a></p></div>` : `<div class="dsec"><p class="eyebrow">${esc(t("allSites"))} (${d.sites.length})</p><div class="sites">${sites.slice(0, 6).map(siteHTML).join("")}</div>
+      <p><a href="https://clinical-trials-search.canada.ca/${S.lang === "fr" ? "fr" : "en"}/search?search_api_fulltext=${esc(id)}" target="_blank" rel="noopener">${esc(t("hcLink"))}</a></p></div>` : `<div class="dsec"><p class="eyebrow">${esc(t("allSites"))} (${d.sites.length})</p><div class="sites">${sites.slice(0, 6).map(siteHTML).join("")}</div>
       ${sites.length > 6 ? `<details class="moresites"><summary>${esc(t("allN")(sites.length))}</summary><div class="sites">${sites.slice(6).map(siteHTML).join("")}</div></details>` : ""}</div>`}
     <details class="dsec"><summary>${esc(t("eligH"))}</summary><div class="crit" lang="en">${critHTML(d.criteria)}</div></details>
     <p class="dates">${esc(t("sponsor"))}: ${esc(d.sponsor)} · ${esc(t("started"))}: ${esc(fmtDate(d.start))} · ${esc(t("recUpd"))}: ${esc(fmtDate(d.upd))}</p>
