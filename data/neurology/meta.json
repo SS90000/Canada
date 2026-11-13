@@ -1,32 +1,32 @@
 {
- "built": "2026-11-13T16:35:53Z",
+ "built": "2026-11-13T16:42:27Z",
  "country": "Canada",
  "area": "neurology",
- "studies": 662,
+ "studies": 685,
  "registryTotal": 4128,
  "sites": 1468,
- "hcOnly": 24,
+ "hcOnly": 47,
  "categories": {
-  "stroke": 119,
+  "stroke": 120,
   "injury": 94,
-  "childneuro": 40,
-  "dementia": 121,
-  "movement": 71,
-  "neuromuscular": 74,
-  "sleep": 53,
-  "braintumour": 65,
+  "childneuro": 42,
+  "dementia": 123,
+  "movement": 74,
+  "neuromuscular": 81,
+  "sleep": 55,
+  "braintumour": 67,
   "neuroinfect": 4,
-  "als": 20,
-  "epilepsy": 24,
-  "ms": 30,
+  "als": 22,
+  "epilepsy": 25,
+  "ms": 32,
   "headache": 23,
   "generalneuro": 7
  },
  "kinds": {
-  "obs": 132,
-  "treat": 383,
+  "obs": 133,
+  "treat": 404,
   "diag": 19,
-  "support": 128
+  "support": 129
  },
  "source": "ClinicalTrials.gov API v2"
 }
