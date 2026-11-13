@@ -1,7 +1,16 @@
-2026-11-13 10:18:07 UTC  Registry reports 4130 open studies with a site in Canada
-2026-11-13 10:18:35 UTC  Downloaded 4130 study records; 104 detail files new or changed
-2026-11-13 10:18:35 UTC  Filled in the region for 357 sites from their city
-2026-11-13 10:18:35 UTC  oncology: 1133 studies at 3602 sites; lung 167, breast 148, solid 141, prostate 126, gyn 114, lymphoma 103, colorectal 97, leukemia 95, general 78, brain 69, pancreas 66, headneck 66, childhood 58, liver 56, myeloma 53, sarcoma 47, skin 47, bladder 46, upperGI 43, kidney 28, neuroendocrine 18, germcell 12, thyroid 8, mesothelioma 1
-2026-11-13 10:18:35 UTC  neurology: 636 studies at 1465 sites; dementia 117, stroke 113, injury 93, movement 69, neuromuscular 69, braintumour 62, sleep 51, childneuro 39, ms 28, headache 23, epilepsy 22, als 20, generalneuro 7, neuroinfect 3
-2026-11-13 10:18:36 UTC  other: 2435 studies at 6611 sites; heart 487, musculoskeletal 437, pain 408, mental 351, metabolic 326, skin 282, immune 280, women 277, lung 259, genetic 207, digestive 197, infection 196, general 176, kidney 162, healthy 118, eyeent 110, blood 86
-2026-11-13 10:18:36 UTC  Wrote 4130 studies; removed 9 closed studies
+2026-11-13 16:15:46 UTC  Could not refresh Orphanet names (HTTP Error 404: Not Found); using the cached list if there is one
+2026-11-13 16:15:46 UTC  Rare-disease name list: 0 names
+2026-11-13 16:15:46 UTC  Registry reports 4128 open studies with a site in Canada
+2026-11-13 16:16:10 UTC  Downloaded 4128 study records; 71 detail files new or changed
+2026-11-13 16:16:11 UTC  Health Canada portal: 0 trials with status R
+2026-11-13 16:16:12 UTC  Health Canada portal: 0 trials with status NYR
+2026-11-13 16:16:12 UTC  Health Canada lists 13 open trials with a ClinicalTrials.gov number; 5 are not in the registry download (no Canadian site listed, or a different status); 6 have no registry record
+2026-11-13 16:16:13 UTC  Added 5 Health Canada-authorized trials whose Canadian sites are not listed yet
+2026-11-13 16:16:13 UTC  Left out (not open to new participants): ACTIVE_NOT_RECRUITING 2237, ENROLLING_BY_INVITATION 198, SUSPENDED 103
+2026-11-13 16:16:13 UTC  Most frequent rare-disease matches: 
+2026-11-13 16:16:13 UTC  Filled in the region for 357 sites from their city
+2026-11-13 16:16:13 UTC  oncology: 1136 studies at 3601 sites; lung 167, breast 149, solid 142, prostate 126, gyn 114, lymphoma 104, colorectal 97, leukemia 96, general 78, brain 69, pancreas 66, headneck 66, childhood 59, liver 56, myeloma 53, skin 48, bladder 47, sarcoma 46, upperGI 43, kidney 28, neuroendocrine 18, germcell 12, thyroid 8, mesothelioma 1
+2026-11-13 16:16:13 UTC  neurology: 639 studies at 1468 sites; dementia 118, stroke 114, injury 93, movement 69, neuromuscular 69, braintumour 62, sleep 51, childneuro 39, ms 28, epilepsy 23, headache 23, als 20, generalneuro 7, neuroinfect 3
+2026-11-13 16:16:13 UTC  other: 2432 studies at 6599 sites; heart 486, musculoskeletal 437, pain 407, mental 351, metabolic 325, skin 282, immune 281, women 277, lung 258, genetic 206, digestive 197, infection 196, general 176, kidney 162, healthy 118, eyeent 110, blood 86
+2026-11-13 16:16:13 UTC  rare: 13 studies at 38 sites; genetic 8, kidney 6, skin 6, rarecancer 5, metabolic 4, lung 4, musculoskeletal 3, digestive 3, eyeent 2, rareneuro 2, heart 1, immune 1
+2026-11-13 16:16:13 UTC  Wrote 4133 studies; removed 4 closed studies
