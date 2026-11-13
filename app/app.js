@@ -144,6 +144,15 @@ for (const [i, lg] of [[0, "en"], [1, "fr"]]) {
   x.b3 = (i ? "Les détails des études peuvent être dépassés. " : "Study details may be out of date. ") + A.tagNote[i];
   x.cat = A.catLabel[i]; x.catAny = A.catAny[i]; x.prov = COUNTRY.region[i]; x.provAny = COUNTRY.regionAny[i];
   x.brand = A.brand[i];
+  const band = x.band;
+  x.band = (n, d) => band(n, d) + (META && META.hcOnly ? (i ? ` Comprend aussi ${META.hcOnly} essais autorisés par Santé Canada dont les sites canadiens ne sont pas encore publiés.`
+                                                            : ` Also includes ${META.hcOnly} trials authorized by Health Canada whose Canadian sites are not listed yet.`) : "");
+  x.hcTag = i ? "Autorisé par Santé Canada" : "Authorized by Health Canada";
+  x.hcWhere = i ? "Canada · sites pas encore publiés" : "Canada · sites not listed yet";
+  x.hcFlag = i ? "Sites canadiens pas encore publiés" : "Canadian sites not listed yet";
+  x.hcFlagP = i ? "Santé Canada a autorisé cet essai au Canada, mais son dossier sur ClinicalTrials.gov n'indique pas encore de site canadien. Parlez-en à votre équipe soignante ou communiquez avec le promoteur."
+                : "Health Canada has authorized this trial in Canada, but its ClinicalTrials.gov record doesn't list a Canadian site yet. Ask your care team, or contact the sponsor.";
+  x.hcLink = i ? "Voir la fiche de Santé Canada" : "See the Health Canada record";
 }
 
 /* ---------- state ---------- */
@@ -208,6 +217,14 @@ function evaluate(r) {
   if (age != null && ((r.a0 != null && age < r.a0) || (r.a1 != null && age > r.a1))) return null;
   if (f.sex === "F" && r.sx === "M") return null;
   if (f.sex === "M" && r.sx === "F") return null;
+  if (r.hc && !r.s.length) {  /* authorized by Health Canada; Canadian sites not listed in the registry yet */
+    if (S.city || (!f.closed && !OPEN(r.os))) return null;
+    let hid = false;
+    if (f.spread === "early" && r.x.length === 1 && r.x[0] === "advanced") hid = true;
+    if (f.spread === "advanced" && r.x.length === 1 && r.x[0] === "early") hid = true;
+    return { r, sites: [], open: [], rec: [], best: null, flags: [], hiddenBySpread: hid, area: f.lat != null || f.prov, hc: true,
+             cat: f.cat && !r.c.includes(f.cat) ? "many" : "" };
+  }
   const sites = areaSites(r);
   const open = sites.filter(x => OPEN(x.s[3]));
   if (!(f.closed ? sites.length : open.length)) return null;
@@ -231,9 +248,9 @@ const mainStage = v => v === "0" ? "0" : v.replace(/[ABC]$/, "");
 function stageFits(x, u) { return x === u || x === mainStage(u) || (mainStage(x) === u && u !== x); }
 function rankKey(e) {
   const ph = /3/.test(e.r.ph) ? 3 : /2/.test(e.r.ph) ? 2 : /1/.test(e.r.ph) ? 1 : 0;
-  if (S.sort === "near") return [e.rec.length ? 0 : 1, e.best?.d ?? 0, KIND_ORDER[e.r.k]];
+  if (S.sort === "near") return [e.hc ? 2 : e.rec.length ? 0 : 1, e.best?.d ?? 0, KIND_ORDER[e.r.k]];
   if (S.sort === "new") return [-(new Date(e.r.upd || 0).getTime())];
-  return [KIND_ORDER[e.r.k], e.cat ? 1 : 0, e.rec.length ? 0 : 1, Math.round((e.best?.d ?? 0) / 25), -ph];
+  return [KIND_ORDER[e.r.k], e.cat ? 1 : 0, e.hc ? 2 : e.rec.length ? 0 : 1, Math.round((e.best?.d ?? 0) / 25), -ph];
 }
 const cmp = (a, b) => { const x = rankKey(a), y = rankKey(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
 function results() {
@@ -383,9 +400,11 @@ function card(e) {
   const r = e.r, b = e.best;
   const tags = [`<span class="tag ${r.k === "treat" ? "" : "other"}">${esc(LG(KIND[r.k]))}</span>`];
   if (r.ph) tags.push(`<span class="tag other">${esc((S.lang === "fr" ? "Phase " : "Phase ") + r.ph)}</span>`);
+  if (r.hc) tags.push(`<span class="tag hc">${esc(t("hcTag"))}</span>`);
   const cats = r.c.map(c => CAT[c] ? LG(CAT[c]) : c).join(" · ");
   const flags = [];
-  if (!e.rec.length && e.open.length) flags.push(`<div class="flag soon"><b>${esc(t("flagSoon"))}.</b><span>${esc(t("flagSoonP"))}</span></div>`);
+  if (e.hc) flags.push(`<div class="flag soon"><b>${esc(t("hcFlag"))}.</b><span>${esc(t("hcFlagP"))}</span></div>`);
+  else if (!e.rec.length && e.open.length) flags.push(`<div class="flag soon"><b>${esc(t("flagSoon"))}.</b><span>${esc(t("flagSoonP"))}</span></div>`);
   else if (!e.open.length) flags.push(`<div class="flag stop"><b>${esc(t("flagClosed"))}.</b><span>${esc(t("flagClosedP"))}</span></div>`);
   if (e.flags.length) flags.push(`<div class="flag"><b>${esc(t("flagStale"))}.</b><span>${esc(e.flags.join(" "))} ${esc(t("confirm"))}</span></div>`);
   const elig = [t("ageRange")(r.a0 != null ? Math.round(r.a0) : null, r.a1 != null ? Math.round(r.a1) : null)];
@@ -400,8 +419,9 @@ function card(e) {
     <div class="meta">${tags.join("")}${r.ai ? `<span class="tag ai">${esc(t("aiBadge"))}</span>` : ""}<span class="nct">${r.id}</span></div>
     <h3>${esc(r.t)}${r.ac ? ` <span class="acr">(${esc(r.ac)})</span>` : ""}</h3>
     <p class="cats">${esc(cats)}</p>
+    ${e.hc ? `<div class="nearest">${statusBadge(r.os)}<span>${esc(t("hcWhere"))}</span></div>` : ""}
     ${b ? `<div class="nearest">${statusBadge(b.s[3])}<span><b>${esc(b.s[0])}</b>, ${esc(b.s[1])}${b.s[2] ? ", " + esc(provName(b.s[2])) : ""}${b.d != null ? ` · ${esc(t("kmAway")(b.d))}` : ""}</span></div>` : ""}
-    <p class="help">${esc(t("sitesCa")(r.s.length, nRec))}</p>
+    ${e.hc ? "" : `<p class="help">${esc(t("sitesCa")(r.s.length, nRec))}</p>`}
     <p class="elig">${esc(elig.join(" · "))}${ext ? " · " + ext : ""}</p>
     ${flags.join("")}
     <div class="row"><button class="btn ghost small" data-open="${r.id}" aria-expanded="${open}">${esc(open ? t("hide") : t("details"))}</button>
@@ -479,8 +499,10 @@ function detailHTML(id, e) {
   const iv = (d.interventions || []).map(i => `${esc(i.name)}${i.type ? ` <small>(${esc(i.type.toLowerCase().replace(/_/g, " "))})</small>` : ""}`);
   return `${aiHTML(id)}<div class="dsec"><p class="eyebrow">${esc(t("summaryH"))}</p><p class="help">${esc(t("fromReg"))}</p><p class="regsum" lang="en">${esc(d.summary).replace(/\n+/g, "<br>")}</p>
      ${iv.length ? `<p class="eyebrow">${esc(t("treatments"))}</p><ul class="facts">${iv.map(x => `<li lang="en">${x}</li>`).join("")}</ul>` : ""}</div>
-    <div class="dsec"><p class="eyebrow">${esc(t("allSites"))} (${d.sites.length})</p><div class="sites">${sites.slice(0, 6).map(siteHTML).join("")}</div>
-      ${sites.length > 6 ? `<details class="moresites"><summary>${esc(t("allN")(sites.length))}</summary><div class="sites">${sites.slice(6).map(siteHTML).join("")}</div></details>` : ""}</div>
+    ${d.hc ? `<div class="dsec"><p class="eyebrow">${esc(t("allSites"))} (0)</p><p class="help">${esc(t("hcFlagP"))}</p>
+      ${central.length ? `<p><small>${esc(t("noContact"))}</small> <code>${esc(central[0])}</code> <button class="btn ghost small" data-copy="${esc(central[0])}">${esc(t("copy"))}</button></p>` : ""}
+      <p><a href="https://clinical-trials-search.canada.ca/${S.lang === "fr" ? "fr" : "en"}/clinical-trial/${esc(d.hc)}" target="_blank" rel="noopener">${esc(t("hcLink"))}</a></p></div>` : `<div class="dsec"><p class="eyebrow">${esc(t("allSites"))} (${d.sites.length})</p><div class="sites">${sites.slice(0, 6).map(siteHTML).join("")}</div>
+      ${sites.length > 6 ? `<details class="moresites"><summary>${esc(t("allN")(sites.length))}</summary><div class="sites">${sites.slice(6).map(siteHTML).join("")}</div></details>` : ""}</div>`}
     <details class="dsec"><summary>${esc(t("eligH"))}</summary><div class="crit" lang="en">${critHTML(d.criteria)}</div></details>
     <p class="dates">${esc(t("sponsor"))}: ${esc(d.sponsor)} · ${esc(t("started"))}: ${esc(fmtDate(d.start))} · ${esc(t("recUpd"))}: ${esc(fmtDate(d.upd))}</p>
     <p><a href="https://clinicaltrials.gov/study/${esc(id)}" target="_blank" rel="noopener">${esc(t("registry"))}</a></p>`;
@@ -576,13 +598,14 @@ function buildSummary() {
   const fr = S.lang === "fr", lines = [];
   const items = [...S.saved].map(id => ROWS.find(r => r.id === id)).filter(Boolean);
   lines.push(fr ? "ESSAIS CLINIQUES À DISCUTER AVEC MON ÉQUIPE SOIGNANTE" : "CLINICAL TRIALS TO DISCUSS WITH MY CARE TEAM");
-  lines.push((fr ? "Préparé avec Cancer Trial Finder (bêta, " : "Prepared with Cancer Trial Finder (beta, ") + ORG.name + (fr ? ") le " : ") on ") + fmtDate(new Date().toISOString().slice(0, 10)) + ".");
+  lines.push((fr ? `Préparé avec ${A.brand[1]} (bêta, ` : `Prepared with ${A.brand[0]} (beta, `) + ORG.name + (fr ? ") le " : ") on ") + fmtDate(new Date().toISOString().slice(0, 10)) + ".");
   lines.push(fr ? `Ceci n'est pas un avis médical. Données de ClinicalTrials.gov au ${fmtDate(META.built.slice(0, 10))}.` : `This is not medical advice. Data from ClinicalTrials.gov as of ${fmtDate(META.built.slice(0, 10))}.`);
   lines.push("");
   items.forEach((r, i) => {
     const e = evaluate(r) || { open: [], best: null, flags: [] };
     lines.push(`${i + 1}. ${r.t} (${r.id}${r.ph ? ", Phase " + r.ph : ""}, ${LG(KIND[r.k])})`);
     const b = e.best || { s: r.s.find(s => OPEN(s[3])) || r.s[0] };
+    if (r.hc && !r.s.length) lines.push(`   ${t("hcTag")}: ${t("hcWhere")}`);
     if (b.s) lines.push(`   ${fr ? "Site" : "Site"}: ${b.s[0]}, ${b.s[1]} – ${SITE[b.s[3]] ? LG([SITE[b.s[3]][0], SITE[b.s[3]][1]]) : ""}`);
     const d = DETAIL.get(r.id); if (d) { const s = d.sites.find(x => x.f === b.s?.[0] && x.city === b.s?.[1]); const c = s?.c || (d.central || [])[0]; if (c) lines.push(`   Contact: ${c}`); }
     if (e.flags?.length) lines.push(`   ${fr ? "Attention" : "Note"}: ${e.flags.join(" ")}`);

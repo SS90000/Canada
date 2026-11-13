@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Download every open clinical study with a site in one country from ClinicalTrials.gov,
-sort each one into the finder's three areas (oncology, neurology, other), and write the
-data files the finder pages read.
+sort each one into the finder's areas (oncology, neurology, other, and an overlapping
+rare-disease area), and write the data files the finder pages read. For Canada it also adds
+open trials that Health Canada has authorized but whose ClinicalTrials.gov record does not
+list a Canadian site yet.
 
 The country comes from the TRIAL_COUNTRY environment variable ("Canada" or "United States").
 
@@ -14,14 +16,15 @@ Output (all under data/):
 
 Only the Python standard library is used, so the GitHub Action needs no installs.
 """
-import json, os, re, sys, time, unicodedata, urllib.parse, urllib.request
+import html, io, json, os, re, sys, time, unicodedata, urllib.parse, urllib.request, zipfile
 from datetime import datetime, timezone
 
 API = "https://clinicaltrials.gov/api/v2/studies"
 COUNTRY = os.environ.get("TRIAL_COUNTRY", "Canada")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
 OPEN = "RECRUITING|NOT_YET_RECRUITING"
-AREAS = ("oncology", "neurology", "other")
+AREAS = ("oncology", "neurology", "other", "rare")
+UA = {"User-Agent": "ClinicalTrialFinder/2.0 (data build; salishseven@gmail.com)"}
 LOG = []
 
 
@@ -208,6 +211,141 @@ def contact_of(c):
     return " · ".join(x for x in [c.get("name", ""), phone, c.get("email", "")] if x)
 
 
+# ---------- rare diseases: names and synonyms from Orphanet's nomenclature ----------
+ORPHA_URL = "https://www.orphadata.com/data/nomenclature/packs/Orphanet_Nomenclature_Pack_EN.zip"
+ORPHA_CACHE = os.path.join(OUT, "_ref", "orpha_names.json")
+# Orphanet names that are also everyday words in registry conditions; matching them adds noise
+RARE_STOP = {"disease", "syndrome", "malformation syndrome", "clinical group", "disorder", "tumor", "tumour", "cancer",
+             "obesity", "hypertension", "anemia", "anaemia", "infertility", "deafness", "epilepsy", "dementia", "stroke",
+             "asthma", "diabetes mellitus", "arthritis", "cardiomyopathy", "neuropathy", "lymphoma", "leukemia", "leukaemia",
+             "sarcoma", "carcinoma", "adenocarcinoma", "glioma", "myopathy", "pain", "fever", "short stature", "autism",
+             "intellectual disability", "rare disease", "rare tumor", "rare cancer", "rare genetic disease", "head and neck cancer"}
+
+
+def norm_name(t):
+    t = unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode().lower()
+    t = re.sub(r"[^a-z0-9]+", " ", t)
+    return " ".join(t.split())
+
+
+def load_rare_names():
+    """Return a set of normalized Orphanet disease names and synonyms (cached for 30 days)."""
+    try:
+        if os.path.exists(ORPHA_CACHE) and time.time() - os.path.getmtime(ORPHA_CACHE) < 30 * 86400:
+            with open(ORPHA_CACHE, encoding="utf-8") as f:
+                return set(json.load(f))
+    except Exception:
+        pass
+    try:
+        with urllib.request.urlopen(urllib.request.Request(ORPHA_URL, headers=UA), timeout=180) as r:
+            z = zipfile.ZipFile(io.BytesIO(r.read()))
+        names = set()
+        for fn in z.namelist():
+            if not fn.lower().endswith(".xml"):
+                continue
+            text = z.read(fn).decode("utf-8", "ignore")
+            for tag in ("Name", "Synonym"):
+                for m in re.finditer(rf'<{tag} lang="en">([^<]+)</{tag}>', text):
+                    n = norm_name(html.unescape(m.group(1)))
+                    if n and n not in RARE_STOP and (" " in n or len(n) >= 8):
+                        names.add(n)
+        if len(names) < 3000:
+            raise RuntimeError(f"only {len(names)} names found")
+        os.makedirs(os.path.dirname(ORPHA_CACHE), exist_ok=True)
+        with open(ORPHA_CACHE, "w", encoding="utf-8") as f:
+            json.dump(sorted(names), f, ensure_ascii=False, separators=(",", ":"))
+        log(f"Loaded {len(names)} rare-disease names from Orphanet")
+        return names
+    except Exception as e:
+        log(f"Could not refresh Orphanet names ({e}); using the cached list if there is one")
+        if os.path.exists(ORPHA_CACHE):
+            with open(ORPHA_CACHE, encoding="utf-8") as f:
+                return set(json.load(f))
+        return set()
+
+
+RARE = set()
+RARE_HITS = {}
+RARE_PHRASE = re.compile(r"\brare (?:disease|disorder|genetic|cancer|tumou?r)s?\b|\borphan (?:disease|drug)", re.I)
+
+
+def rare_match(texts):
+    """Orphanet names found in the condition texts (as whole phrases), or [] if none."""
+    found = []
+    for t in texts:
+        variants = [t]
+        if "," in t:  # MeSH style "Muscular Dystrophy, Duchenne" -> "Duchenne Muscular Dystrophy"
+            a, b = t.split(",", 1)
+            variants.append(b + " " + a)
+        for v in variants:
+            w = norm_name(v).split()
+            for i in range(len(w)):
+                for j in range(i + 1, min(len(w), i + 9) + 1):
+                    g = " ".join(w[i:j])
+                    if g in RARE:
+                        found.append(g)
+    return found
+
+
+# ---------- Health Canada: authorized trials whose registry record lacks a Canadian site ----------
+HC_SEARCH = ("https://clinical-trials-search.canada.ca/en/search?search_api_fulltext=&field_medical_condition="
+             "&field_trial_status={st}&field_province_1=All&field_city=&field_nol_date=&field_nol_date_1=&page={pg}")
+HC_STATUS = {"2714": "R", "2693": "NYR"}  # Recruiting, Not yet recruiting
+
+
+def hc_trials():
+    """Scrape Health Canada's portal for open trials. Returns (by_nct, no_registry_count)."""
+    by_nct, noreg = {}, 0
+    for st, code in HC_STATUS.items():
+        pg, total = 0, None
+        while True:
+            url = HC_SEARCH.format(st=st, pg=pg)
+            page = None
+            for attempt in range(4):
+                try:
+                    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+                        page = r.read().decode("utf-8", "ignore")
+                    break
+                except Exception as e:
+                    time.sleep(5 * (attempt + 1))
+            if page is None:
+                raise RuntimeError("Health Canada portal did not respond")
+            if total is None:
+                m = re.search(r"of\s+([\d,]+)\s+trials", page)
+                total = int(m.group(1).replace(",", "")) if m else 0
+            blocks = re.split(r'<div class="views-row">', page)[1:]
+            for b in blocks:
+                ctrl = re.search(r'href="/en/clinical-trial/(\d+)[^"]*"', b)
+                if not ctrl:
+                    continue
+                ids = sorted(set(re.findall(r"NCT\d{8}", b)))
+                if not ids and not re.search(r"views-field-field-nct-id[\s\S]*?<a ", b):
+                    noreg += 1
+                for n in ids:
+                    by_nct.setdefault(n, {"ctrl": ctrl.group(1), "st": code})
+            pg += 1
+            if pg * 10 >= total or not blocks:
+                break
+            time.sleep(0.3)
+        log(f"Health Canada portal: {total} trials with status {code}")
+    return by_nct, noreg
+
+
+def not_included_counts():
+    """Studies with a site in COUNTRY that the finder leaves out, by status."""
+    out = {}
+    for st in ("ACTIVE_NOT_RECRUITING", "ENROLLING_BY_INVITATION", "SUSPENDED"):
+        try:
+            out[st] = get({"format": "json", "pageSize": 1, "countTotal": "true", "fields": "NCTId",
+                           "filter.overallStatus": st, "filter.advanced": f"AREA[LocationCountry]{COUNTRY}"}).get("totalCount")
+        except Exception:
+            out[st] = None
+    return out
+
+
+RARE_OTHER = {"heart", "lung", "metabolic", "digestive", "kidney", "immune", "skin", "blood", "musculoskeletal", "eyeent", "genetic", "infection"}
+
+
 def classify(ident, conds, meshes, ancestors, healthy):
     """Return {area: [categories]} for the areas this study belongs to."""
     base = " | ".join([ident.get("briefTitle", ""), ident.get("officialTitle", ""),
@@ -236,10 +374,21 @@ def classify(ident, conds, meshes, ancestors, healthy):
         if healthy and "healthy" not in other and re.search(r"healthy", base, re.I):
             other.append("healthy")
         out["other"] = other or ["general"]
+    rare = rare_match([*conds.get("conditions", []), *meshes])
+    if rare or RARE_PHRASE.search(base):
+        for g in rare:
+            RARE_HITS[g] = RARE_HITS.get(g, 0) + 1
+        cats = []
+        if "oncology" in out:
+            cats.append("rarecancer")
+        if "neurology" in out:
+            cats.append("rareneuro")
+        cats += [k for k, rx in OTHER_RE if k in RARE_OTHER and rx.search(full)]
+        out["rare"] = cats or ["raregeneral"]
     return out
 
 
-def build(st):
+def build(st, hc=None):
     p = st.get("protocolSection", {})
     d = st.get("derivedSection", {})
     ident, status = p.get("identificationModule", {}), p.get("statusModule", {})
@@ -274,7 +423,7 @@ def build(st):
                       "zip": L.get("zip") or "", "s": s,
                       "lat": round(g["lat"], 4) if "lat" in g else None, "lon": round(g["lon"], 4) if "lon" in g else None,
                       "c": contact_of(sc)})
-    if not sites:
+    if not sites and not hc:
         return None, None
     row = {"id": nct, "t": ident.get("briefTitle", ""), "ac": ident.get("acronym", ""), "k": kind, "ph": ph,
            "areas": areas, "x": extent, "sx": {"FEMALE": "F", "MALE": "M"}.get(elig.get("sex", "ALL"), "A"),
@@ -283,6 +432,9 @@ def build(st):
            "pcd": (status.get("primaryCompletionDateStruct") or {}).get("date", ""),
            "sp": (p.get("sponsorCollaboratorsModule", {}).get("leadSponsor") or {}).get("name", ""),
            "sites": sites}
+    if hc:
+        row["hc"] = hc["ctrl"]
+        row["os"] = SITE_ST.get(status.get("overallStatus", ""), "R")
     detail = {"id": nct, "title": ident.get("briefTitle", ""), "official": ident.get("officialTitle", ""),
               "summary": (p.get("descriptionModule", {}) or {}).get("briefSummary", ""),
               "conditions": conds.get("conditions", []),
@@ -296,6 +448,8 @@ def build(st):
               "pcd": row["pcd"], "upd": row["upd"], "sponsor": row["sp"], "areas": sorted(areas),
               "central": [contact_of(c) for c in (cl.get("centralContacts") or [])][:2],
               "sites": sites, "sitesOutside": outside}
+    if hc:
+        detail["hc"] = hc["ctrl"]
     return row, detail
 
 
@@ -352,6 +506,8 @@ def write_area(area, rows, built, total):
         row["c"] = r["areas"][area]
         if area == "oncology":
             row["x"] = r["x"]
+        if r.get("hc"):
+            row["hc"], row["os"] = r["hc"], r["os"]
         row["s"] = s
         out.append(row)
     d = os.path.join(OUT, area)
@@ -359,13 +515,15 @@ def write_area(area, rows, built, total):
     with open(os.path.join(d, "index.json"), "w", encoding="utf-8") as f:
         json.dump({"v": 2, "country": COUNTRY, "area": area, "cities": cities, "fac": facs, "rows": out},
                   f, ensure_ascii=False, separators=(",", ":"))
+    if not out:
+        log(f"{area}: no studies")
     cats, kinds = {}, {}
     for r in out:
         for c in r["c"]:
             cats[c] = cats.get(c, 0) + 1
         kinds[r["k"]] = kinds.get(r["k"], 0) + 1
     meta = {"built": built, "country": COUNTRY, "area": area, "studies": len(out), "registryTotal": total,
-            "sites": sum(len(r["s"]) for r in out), "categories": cats, "kinds": kinds, "source": "ClinicalTrials.gov API v2"}
+            "sites": sum(len(r["s"]) for r in out), "hcOnly": sum(1 for r in out if r.get("hc")), "categories": cats, "kinds": kinds, "source": "ClinicalTrials.gov API v2"}
     with open(os.path.join(d, "meta.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=1)
     log(f"{area}: {meta['studies']} studies at {meta['sites']} sites; " +
@@ -374,6 +532,9 @@ def write_area(area, rows, built, total):
 
 
 def main():
+    global RARE
+    RARE = load_rare_names()
+    log(f"Rare-disease name list: {len(RARE)} names")
     tdir = os.path.join(OUT, "t")
     os.makedirs(tdir, exist_ok=True)
     rows, keep, total, seen, written = [], set(), None, 0, 0
@@ -398,6 +559,38 @@ def main():
     log(f"Downloaded {seen} study records; {written} detail files new or changed")
     if total and seen < 0.9 * total:
         raise RuntimeError(f"Only {seen} of {total} records downloaded; keeping the previous data")
+    hc_added, hc_noreg = 0, None
+    if COUNTRY == "Canada":
+        try:
+            by_nct, hc_noreg = hc_trials()
+            want = [n for n in by_nct if n not in keep]
+            log(f"Health Canada lists {len(by_nct)} open trials with a ClinicalTrials.gov number; "
+                f"{len(want)} are not in the registry download (no Canadian site listed, or a different status); "
+                f"{hc_noreg} have no registry record")
+            for i in range(0, len(want), 100):
+                pg = get({"format": "json", "pageSize": 100, "filter.ids": ",".join(want[i:i + 100]),
+                          "filter.overallStatus": OPEN})
+                for st in pg.get("studies", []):
+                    nct = st["protocolSection"]["identificationModule"]["nctId"]
+                    row, detail = build(st, hc=by_nct[nct])
+                    if not row or row["sites"]:
+                        continue
+                    rows.append(row)
+                    keep.add(nct)
+                    hc_added += 1
+                    path = os.path.join(tdir, nct + ".json")
+                    text = json.dumps(detail, ensure_ascii=False, separators=(",", ":"))
+                    if not os.path.exists(path) or open(path, encoding="utf-8").read() != text:
+                        with open(path, "w", encoding="utf-8") as f:
+                            f.write(text)
+                time.sleep(0.4)
+            log(f"Added {hc_added} Health Canada-authorized trials whose Canadian sites are not listed yet")
+        except Exception as e:
+            log(f"Health Canada step skipped ({e!r}); the registry data is still complete")
+    left_out = not_included_counts()
+    log("Left out (not open to new participants): " + ", ".join(f"{k} {v}" for k, v in left_out.items()))
+    top = sorted(RARE_HITS.items(), key=lambda kv: -kv[1])[:40]
+    log("Most frequent rare-disease matches: " + ", ".join(f"{k} {v}" for k, v in top))
     removed = 0
     for fn in os.listdir(tdir):
         if fn.endswith(".json") and fn[:-5] not in keep:
@@ -413,7 +606,8 @@ def main():
     with open(os.path.join(OUT, "meta.json"), "w", encoding="utf-8") as f:
         json.dump({"built": built, "country": COUNTRY, "studies": len(rows), "registryTotal": total,
                    "areas": {a: {"studies": m["studies"], "sites": m["sites"]} for a, m in metas.items()},
-                   "source": "ClinicalTrials.gov API v2"}, f, ensure_ascii=False, indent=1)
+                   "hcOnly": hc_added, "hcNoRegistry": hc_noreg, "notIncluded": left_out,
+                   "source": "ClinicalTrials.gov API v2" + ("; Health Canada clinical trial search portal" if hc_added else "")}, f, ensure_ascii=False, indent=1)
     log(f"Wrote {len(rows)} studies; removed {removed} closed studies")
 
 

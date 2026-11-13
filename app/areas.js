@@ -68,5 +68,27 @@ const AREAS = {
       genetic: ["Genetic, rare and newborn conditions", "Affections génétiques, rares et néonatales"], pain: ["Pain, surgery and intensive care", "Douleur, chirurgie et soins intensifs"],
       healthy: ["Studies for healthy volunteers", "Études pour volontaires en santé"], general: ["Other conditions", "Autres affections"]
     }
+  },
+  rare: {
+    brand: ["Rare Disease Trial Finder", "Essais cliniques sur les maladies rares"],
+    short: ["Rare diseases", "Maladies rares"],
+    studies: ["open studies on rare diseases", "études ouvertes sur les maladies rares"],
+    h1: c => [`Find clinical trials for rare diseases ${c[0]}`, `Trouver des essais cliniques sur les maladies rares ${c[1]}`],
+    lede: ["Search open clinical trials and studies for rare diseases, including rare cancers and rare neurological, genetic, blood and metabolic conditions. These studies also appear in the cancer, neurology and other finders. See each site's status and contact, and read the full eligibility criteria.",
+           "Cherchez des essais et des études ouverts sur les maladies rares, y compris les cancers rares et les affections neurologiques, génétiques, sanguines et métaboliques rares. Ces études figurent aussi dans les autres outils. Consultez le statut et le contact de chaque site et les critères d'admissibilité complets."],
+    tagNote: ["Rare diseases are detected automatically by matching each study's conditions to Orphanet's list of rare diseases, and can be wrong.", "Les maladies rares sont détectées automatiquement en comparant les affections de chaque étude à la liste d'Orphanet, et peuvent être erronées."],
+    catLabel: ["Type of rare disease", "Type de maladie rare"], catAny: ["Any rare disease", "Toute maladie rare"],
+    about: ["about a rare disease", "portant sur une maladie rare"], tagged: ["Whether a study is about a rare disease, and its type, are detected", "Le fait qu'une étude porte sur une maladie rare, et son type, sont détectés"],
+    many: false, stage: false,
+    cats: {
+      rarecancer: ["Rare cancers", "Cancers rares"], rareneuro: ["Rare neurological and neuromuscular conditions", "Affections neurologiques et neuromusculaires rares"],
+      genetic: ["Rare genetic, metabolic and newborn conditions", "Affections génétiques, métaboliques et néonatales rares"], blood: ["Rare blood disorders", "Troubles sanguins rares"],
+      metabolic: ["Rare hormone and metabolic conditions", "Affections hormonales et métaboliques rares"], immune: ["Rare immune and inflammatory conditions", "Affections immunitaires et inflammatoires rares"],
+      lung: ["Rare lung conditions", "Affections pulmonaires rares"], heart: ["Rare heart and blood vessel conditions", "Affections rares du cœur et des vaisseaux"],
+      kidney: ["Rare kidney conditions", "Affections rénales rares"], digestive: ["Rare digestive and liver conditions", "Affections digestives et hépatiques rares"],
+      skin: ["Rare skin and connective tissue conditions", "Affections rares de la peau et du tissu conjonctif"], musculoskeletal: ["Rare bone and muscle conditions", "Affections rares des os et des muscles"],
+      eyeent: ["Rare eye and ear conditions", "Affections rares des yeux et des oreilles"], infection: ["Rare infections", "Infections rares"],
+      raregeneral: ["Other rare diseases", "Autres maladies rares"]
+    }
   }
 };
