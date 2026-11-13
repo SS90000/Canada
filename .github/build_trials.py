@@ -219,7 +219,7 @@ RARE_STOP = {"disease", "syndrome", "malformation syndrome", "clinical group", "
              "obesity", "hypertension", "anemia", "anaemia", "infertility", "deafness", "epilepsy", "dementia", "stroke",
              "asthma", "diabetes mellitus", "arthritis", "cardiomyopathy", "neuropathy", "lymphoma", "leukemia", "leukaemia",
              "sarcoma", "carcinoma", "adenocarcinoma", "glioma", "myopathy", "pain", "fever", "short stature", "autism",
-             "intellectual disability", "rare disease", "rare tumor", "rare cancer", "rare genetic disease", "head and neck cancer"}
+             "intellectual disability", "alopecia", "spinal cord injury", "rare disease", "rare tumor", "rare cancer", "rare genetic disease", "head and neck cancer"}
 
 
 def norm_name(t):
@@ -277,9 +277,11 @@ def rare_match(texts):
         for v in variants:
             w = norm_name(v).split()
             for i in range(len(w)):
+                if i and w[i - 1] == "non":  # "non small cell lung cancer" is not "small cell lung cancer"
+                    continue
                 for j in range(i + 1, min(len(w), i + 9) + 1):
                     g = " ".join(w[i:j])
-                    if g in RARE:
+                    if g in RARE and g not in RARE_STOP:
                         found.append(g)
     return found
 
