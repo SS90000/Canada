@@ -292,27 +292,37 @@ HC_SEARCH = ("https://clinical-trials-search.canada.ca/en/search?search_api_full
 HC_STATUS = {"2714": "R", "2693": "NYR"}  # Recruiting, Not yet recruiting
 
 
+HC_CACHE = os.path.join(OUT, "_ref", "hc_open.json")
+
+
+def hc_fetch(url):
+    """One portal page with its trial blocks; retries empty or failed pages."""
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
+                page = r.read().decode("utf-8", "ignore")
+            blocks = [b for b in re.split(r'<div class="views-row">', page)[1:] if "/en/clinical-trial/" in b]
+            if blocks:
+                return page, blocks
+        except Exception:
+            pass
+        time.sleep(6 * (attempt + 1))
+    return None, []
+
+
 def hc_trials():
-    """Scrape Health Canada's portal for open trials. Returns (by_nct, no_registry_count)."""
-    by_nct, noreg = {}, set()
+    """Scrape Health Canada's portal for open trials. Returns (by_nct, no_registry_count).
+    If some pages cannot be read, the trials found on the last full run fill the gap."""
+    by_nct, noreg, complete = {}, set(), True
     for st, code in HC_STATUS.items():
-        pg, total = 0, None
+        page, blocks = hc_fetch(HC_SEARCH.format(st=st, pg=0))
+        if page is None:
+            raise RuntimeError("Health Canada portal did not respond")
+        m = re.search(r"of\s*(?:<[^>]*>\s*)*([\d,]+)\s*(?:<[^>]*>\s*)*trials", page)
+        total = int(m.group(1).replace(",", "")) if m else None
+        npages = -(-total // 10) if total else 600
+        missed, pg = 0, 0
         while True:
-            url = HC_SEARCH.format(st=st, pg=pg)
-            page = None
-            for attempt in range(4):
-                try:
-                    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60) as r:
-                        page = r.read().decode("utf-8", "ignore")
-                    break
-                except Exception as e:
-                    time.sleep(5 * (attempt + 1))
-            if page is None:
-                raise RuntimeError("Health Canada portal did not respond")
-            if total is None:
-                m = re.search(r"of\s*(?:<[^>]*>\s*)*([\d,]+)\s*(?:<[^>]*>\s*)*trials", page)
-                total = int(m.group(1).replace(",", "")) if m else None
-            blocks = re.split(r'<div class="views-row">', page)[1:]
             for b in blocks:
                 ctrl = re.search(r'href="/en/clinical-trial/(\d+)[^"]*"', b)
                 if not ctrl:
@@ -323,10 +333,30 @@ def hc_trials():
                 for n in ids:
                     by_nct.setdefault(n, {"ctrl": ctrl.group(1), "st": code})
             pg += 1
-            if not any('/en/clinical-trial/' in b for b in blocks) or pg >= 600 or (total and pg * 10 >= total):
+            if pg >= npages:
                 break
-            time.sleep(0.3)
-        log(f"Health Canada portal: {total} trials with status {code} ({pg} pages read)")
+            time.sleep(0.5)
+            page, blocks = hc_fetch(HC_SEARCH.format(st=st, pg=pg))
+            if not blocks:
+                if not total:
+                    break
+                missed += 1
+        if missed:
+            complete = False
+        log(f"Health Canada portal: {total} trials with status {code} ({pg} pages, {missed} could not be read)")
+    try:
+        if complete:
+            os.makedirs(os.path.dirname(HC_CACHE), exist_ok=True)
+            with open(HC_CACHE, "w", encoding="utf-8") as f:
+                json.dump({"by_nct": by_nct, "noreg": len(noreg)}, f, separators=(",", ":"))
+        elif os.path.exists(HC_CACHE):
+            with open(HC_CACHE, encoding="utf-8") as f:
+                prev = json.load(f)
+            for n, v in prev["by_nct"].items():
+                by_nct.setdefault(n, v)
+            log("Some Health Canada pages could not be read; trials from the last full run fill the gap")
+    except Exception as e:
+        log(f"Health Canada cache problem ({e!r})")
     return by_nct, len(noreg)
 
 
