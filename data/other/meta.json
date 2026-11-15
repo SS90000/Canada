@@ -1,11 +1,11 @@
 {
- "built": "2026-11-14T10:09:42Z",
+ "built": "2026-11-15T10:11:20Z",
  "country": "Canada",
  "area": "other",
- "studies": 2554,
+ "studies": 2555,
  "registryTotal": 4128,
  "sites": 6599,
- "hcOnly": 122,
+ "hcOnly": 123,
  "categories": {
   "digestive": 213,
   "genetic": 234,
@@ -19,15 +19,15 @@
   "musculoskeletal": 445,
   "kidney": 172,
   "eyeent": 122,
-  "lung": 287,
+  "lung": 288,
   "mental": 355,
   "pain": 414,
   "healthy": 118,
-  "infection": 205
+  "infection": 206
  },
  "kinds": {
   "obs": 474,
-  "treat": 1399,
+  "treat": 1400,
   "diag": 65,
   "support": 616
  },

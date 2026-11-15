@@ -1,7 +1,7 @@
 {
- "built": "2026-11-14T10:09:42Z",
+ "built": "2026-11-15T10:11:20Z",
  "country": "Canada",
- "studies": 4407,
+ "studies": 4408,
  "registryTotal": 4128,
  "areas": {
   "oncology": {
@@ -13,7 +13,7 @@
    "sites": 1468
   },
   "other": {
-   "studies": 2554,
+   "studies": 2555,
    "sites": 6599
   },
   "rare": {
@@ -21,8 +21,8 @@
    "sites": 2229
   }
  },
- "hcOnly": 279,
- "hcNoRegistry": 383,
+ "hcOnly": 280,
+ "hcNoRegistry": 384,
  "notIncluded": {
   "ACTIVE_NOT_RECRUITING": 2237,
   "ENROLLING_BY_INVITATION": 198,
