@@ -1,31 +1,31 @@
 {
- "built": "2026-11-16T10:54:57Z",
+ "built": "2026-11-17T10:31:37Z",
  "country": "Canada",
- "studies": 4408,
- "registryTotal": 4128,
+ "studies": 4404,
+ "registryTotal": 4125,
  "areas": {
   "oncology": {
    "studies": 1247,
-   "sites": 3601
+   "sites": 3599
   },
   "neurology": {
-   "studies": 685,
-   "sites": 1468
+   "studies": 683,
+   "sites": 1465
   },
   "other": {
-   "studies": 2555,
-   "sites": 6599
+   "studies": 2551,
+   "sites": 6591
   },
   "rare": {
-   "studies": 829,
-   "sites": 2229
+   "studies": 827,
+   "sites": 2225
   }
  },
- "hcOnly": 280,
+ "hcOnly": 279,
  "hcNoRegistry": 384,
  "notIncluded": {
-  "ACTIVE_NOT_RECRUITING": 2237,
-  "ENROLLING_BY_INVITATION": 198,
+  "ACTIVE_NOT_RECRUITING": 2241,
+  "ENROLLING_BY_INVITATION": 199,
   "SUSPENDED": 103
  },
  "source": "ClinicalTrials.gov API v2; Health Canada clinical trial search portal"
