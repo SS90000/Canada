@@ -1,11 +1,11 @@
 {
- "built": "2026-11-17T10:31:37Z",
+ "built": "2026-11-18T10:30:18Z",
  "country": "Canada",
  "area": "neurology",
  "studies": 683,
- "registryTotal": 4125,
- "sites": 1465,
- "hcOnly": 47,
+ "registryTotal": 4129,
+ "sites": 1470,
+ "hcOnly": 46,
  "categories": {
   "stroke": 120,
   "injury": 94,
