@@ -1,10 +1,10 @@
 {
- "built": "2026-11-18T10:30:18Z",
+ "built": "2026-11-19T10:31:51Z",
  "country": "Canada",
  "area": "neurology",
- "studies": 683,
- "registryTotal": 4129,
- "sites": 1470,
+ "studies": 684,
+ "registryTotal": 4134,
+ "sites": 1473,
  "hcOnly": 46,
  "categories": {
   "stroke": 120,
@@ -14,7 +14,7 @@
   "movement": 74,
   "neuromuscular": 80,
   "sleep": 55,
-  "braintumour": 66,
+  "braintumour": 67,
   "neuroinfect": 4,
   "als": 22,
   "epilepsy": 25,
@@ -24,7 +24,7 @@
  },
  "kinds": {
   "obs": 133,
-  "treat": 402,
+  "treat": 403,
   "diag": 19,
   "support": 129
  },
