@@ -1,35 +1,35 @@
 {
- "built": "2026-11-19T10:31:51Z",
+ "built": "2026-11-20T10:31:46Z",
  "country": "Canada",
  "area": "other",
  "studies": 2560,
  "registryTotal": 4134,
- "sites": 6597,
+ "sites": 6590,
  "hcOnly": 121,
  "categories": {
-  "digestive": 213,
+  "digestive": 214,
   "genetic": 235,
-  "metabolic": 345,
+  "metabolic": 346,
   "immune": 313,
-  "heart": 505,
+  "heart": 506,
   "women": 284,
-  "skin": 303,
-  "blood": 105,
+  "skin": 304,
+  "blood": 104,
   "general": 183,
   "musculoskeletal": 451,
-  "kidney": 173,
+  "kidney": 174,
   "eyeent": 123,
   "lung": 289,
-  "mental": 359,
+  "mental": 358,
   "pain": 415,
   "healthy": 118,
-  "infection": 206
+  "infection": 205
  },
  "kinds": {
   "obs": 473,
-  "treat": 1403,
-  "diag": 66,
-  "support": 618
+  "treat": 1401,
+  "diag": 67,
+  "support": 619
  },
  "source": "ClinicalTrials.gov API v2"
 }

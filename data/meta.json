@@ -1,30 +1,30 @@
 {
- "built": "2026-11-19T10:31:51Z",
+ "built": "2026-11-20T10:31:46Z",
  "country": "Canada",
  "studies": 4411,
  "registryTotal": 4134,
  "areas": {
   "oncology": {
-   "studies": 1245,
-   "sites": 3582
+   "studies": 1244,
+   "sites": 3584
   },
   "neurology": {
    "studies": 684,
-   "sites": 1473
+   "sites": 1474
   },
   "other": {
    "studies": 2560,
-   "sites": 6597
+   "sites": 6590
   },
   "rare": {
-   "studies": 828,
-   "sites": 2235
+   "studies": 827,
+   "sites": 2237
   }
  },
  "hcOnly": 277,
  "hcNoRegistry": 384,
  "notIncluded": {
-  "ACTIVE_NOT_RECRUITING": 2244,
+  "ACTIVE_NOT_RECRUITING": 2243,
   "ENROLLING_BY_INVITATION": 200,
   "SUSPENDED": 103
  },

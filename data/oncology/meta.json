@@ -1,10 +1,10 @@
 {
- "built": "2026-11-19T10:31:51Z",
+ "built": "2026-11-20T10:31:46Z",
  "country": "Canada",
  "area": "oncology",
- "studies": 1245,
+ "studies": 1244,
  "registryTotal": 4134,
- "sites": 3582,
+ "sites": 3584,
  "hcOnly": 115,
  "categories": {
   "breast": 156,
@@ -22,7 +22,7 @@
   "upperGI": 48,
   "skin": 56,
   "kidney": 31,
-  "brain": 76,
+  "brain": 75,
   "neuroendocrine": 19,
   "headneck": 71,
   "pancreas": 74,
@@ -34,7 +34,7 @@
  },
  "kinds": {
   "obs": 144,
-  "treat": 906,
+  "treat": 905,
   "diag": 51,
   "support": 144
  },
