@@ -1,24 +1,24 @@
 {
- "built": "2026-11-20T10:31:46Z",
+ "built": "2026-11-21T10:13:11Z",
  "country": "Canada",
  "area": "rare",
- "studies": 827,
- "registryTotal": 4134,
- "sites": 2237,
- "hcOnly": 114,
+ "studies": 828,
+ "registryTotal": 4135,
+ "sites": 2243,
+ "hcOnly": 113,
  "categories": {
   "heart": 145,
-  "metabolic": 115,
-  "genetic": 223,
+  "metabolic": 116,
+  "genetic": 224,
   "immune": 250,
-  "skin": 129,
-  "blood": 246,
-  "rarecancer": 364,
-  "musculoskeletal": 133,
+  "skin": 128,
+  "blood": 247,
+  "rarecancer": 365,
+  "musculoskeletal": 134,
   "rareneuro": 178,
   "kidney": 69,
   "eyeent": 48,
-  "lung": 123,
+  "lung": 122,
   "digestive": 96,
   "infection": 45,
   "raregeneral": 18
@@ -27,7 +27,7 @@
   "obs": 153,
   "treat": 600,
   "diag": 14,
-  "support": 60
+  "support": 61
  },
  "source": "ClinicalTrials.gov API v2"
 }
