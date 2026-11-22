@@ -20,6 +20,7 @@
 <div class="wrap">
   <main>
     <section class="panel">
+      <div class="langpick" id="langPick"></div>
       <h1 id="h1"></h1>
       <p class="lede" id="lede"></p>
       <div class="areas">
@@ -75,7 +76,12 @@ const T = {
         note: d => `Bêta. Ne constitue pas un avis médical. Données de ClinicalTrials.gov${COUNTRY.code === "CA" ? " et du portail de recherche d'essais cliniques de Santé Canada" : ""}, mises à jour chaque jour${d ? ` (dernière mise à jour : ${d})` : ""}. En cas d'urgence, composez le 911.`,
         foot: `Exploité par ${ORG.name}. Non affilié à ClinicalTrials.gov ni à la National Library of Medicine des États-Unis, et non approuvé par eux.` }
 };
-let lang = "en", META = null;
+let META = null;
+let lang = (() => {
+  try { const q = new URLSearchParams(location.search).get("lang"); if (COUNTRY.langs.includes(q)) return q; } catch (e) {}
+  try { const m = localStorage.getItem("ctf-lang"); if (COUNTRY.langs.includes(m)) return m; } catch (e) {}
+  return COUNTRY.langs[0]; })();
+const pick = l => { lang = l; try { localStorage.setItem("ctf-lang", l); } catch (e) {} render(); };
 const n = x => x == null ? "?" : x.toLocaleString(COUNTRY.locale[lang === "fr" ? 1 : 0]);
 function render() {
   const t = T[lang];
@@ -95,9 +101,14 @@ function render() {
   for (const [h, p] of t.ni(META)) { const b = document.createElement("p"); const s = document.createElement("b"); s.textContent = h + ". "; b.append(s, p); body.append(b); }
   document.getElementById("lang-en").setAttribute("aria-pressed", lang === "en");
   document.getElementById("lang-fr").setAttribute("aria-pressed", lang === "fr");
+  document.querySelectorAll("a.areacard").forEach(a => { a.href = a.getAttribute("href").split("?")[0] + (COUNTRY.langs.length > 1 ? `?lang=${lang}` : ""); });
+  const lp = document.getElementById("langPick");
+  lp.hidden = COUNTRY.langs.length < 2;
+  lp.innerHTML = `<span>${lang === "fr" ? "Langue" : "Language"}:</span>` + COUNTRY.langs.map(l => `<button type="button" data-l="${l}" lang="${l}" aria-pressed="${l === lang}">${l === "fr" ? "Français" : "English"}</button>`).join("");
+  lp.querySelectorAll("[data-l]").forEach(b => b.onclick = () => pick(b.dataset.l));
 }
-document.getElementById("lang-en").onclick = () => { lang = "en"; render(); };
-document.getElementById("lang-fr").onclick = () => { lang = "fr"; render(); };
+document.getElementById("lang-en").onclick = () => pick("en");
+document.getElementById("lang-fr").onclick = () => pick("fr");
 render();
 fetch("data/meta.json").then(r => r.ok ? r.json() : null).then(m => { META = m; render(); }).catch(() => {});
 </script>

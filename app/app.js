@@ -15,15 +15,27 @@ const UNIT = MI ? "mi" : "km";
 const OPEN = s => s === "R" || s === "NYR";
 const KIND_ORDER = { treat: 0, diag: 1, support: 2, obs: 3 };
 const BLOOD = new Set(["leukemia", "lymphoma", "myeloma"]);
+/* languages: every label list is [English, French, German, Italian, Spanish]; a shorter list falls back to English */
+const LANGS = ["en", "fr", "de", "it", "es"];
+const LI = l => Math.max(0, LANGS.indexOf(l));
+const P = (arr, i) => (arr && arr[i] != null ? arr[i] : arr && arr[0]);
+const LOC = l => (COUNTRY.locales && COUNTRY.locales[l]) || (Array.isArray(COUNTRY.locale) ? COUNTRY.locale[LI(l)] : null) || l;
+const EMERG = COUNTRY.emergency || "911";
 
 /* ---------- labels ---------- */
 const A = AREAS[AREA];
 const CAT = A.cats;
 const MANY = A.many ? new Set(["solid", "general"]) : new Set();
-const KIND = { treat: ["Treatment", "Traitement"], diag: ["Diagnosis and screening", "Diagnostic et dépistage"],
-  support: ["Supportive care and other", "Soins de soutien et autres"], obs: ["Observational", "Observation"] };
-const SITE = { R: ["Recruiting", "Recrute", "st-rec"], NYR: ["Coming soon", "Bientôt", "st-soon"], ANR: ["Not recruiting", "Ne recrute pas", "st-stop"],
-  INV: ["By invitation only", "Sur invitation seulement", "st-stop"], SUS: ["Suspended", "Suspendu", "st-stop"], STOP: ["Closed", "Fermé", "st-stop"] };
+const KIND = { treat: ["Treatment", "Traitement", "Behandlung", "Trattamento", "Tratamiento"],
+  diag: ["Diagnosis and screening", "Diagnostic et dépistage", "Diagnose und Früherkennung", "Diagnosi e screening", "Diagnóstico y cribado"],
+  support: ["Supportive care and other", "Soins de soutien et autres", "Unterstützende Versorgung und anderes", "Cure di supporto e altro", "Cuidados de apoyo y otros"],
+  obs: ["Observational", "Observation", "Beobachtungsstudie", "Osservazionale", "Observacional"] };
+const SITE = { R: [["Recruiting", "Recrute", "Rekrutiert", "Recluta", "Reclutando"], "st-rec"],
+  NYR: [["Coming soon", "Bientôt", "Bald", "Presto", "Próximamente"], "st-soon"],
+  ANR: [["Not recruiting", "Ne recrute pas", "Rekrutiert nicht", "Non recluta", "No recluta"], "st-stop"],
+  INV: [["By invitation only", "Sur invitation seulement", "Nur auf Einladung", "Solo su invito", "Solo por invitación"], "st-stop"],
+  SUS: [["Suspended", "Suspendu", "Unterbrochen", "Sospeso", "Suspendido"], "st-stop"],
+  STOP: [["Closed", "Fermé", "Geschlossen", "Chiuso", "Cerrado"], "st-stop"] };
 const PROV_FR = COUNTRY.regionFr || {};
 
 const T = {
@@ -36,7 +48,7 @@ en: {
   before: "Before you start",
   b1: "This is a beta version. It is not medical advice.", b2: "Results are a first screen. Only a study team can confirm whether you can join.",
   b3: "Study details may be out of date. Cancer type and disease stage are detected automatically and can be wrong.",
-  b4: "Your answers stay in this browser tab. Nothing is saved or sent anywhere.", b5: "In an emergency, call 911 or go to the nearest emergency department.",
+  b4: "Your answers stay in this browser tab. Nothing is saved or sent anywhere.", b5: `In an emergency, call ${EMERG} or go to the nearest emergency department.`,
   consent: "I have read and agree to the Terms of use. I understand this is a beta, not medical advice, and that I should confirm everything with my care team.",
   readTerms: "Read the full terms of use",
   searchH: "Search", cat: "Type of cancer", catAny: "Any type of cancer", many: "Also show studies open to many cancer types",
@@ -52,7 +64,7 @@ en: {
   mapNoTiles: "The street map isn't available here, so studies are listed by city.",
   cityAll: "All cities", atCity: c => `Showing studies in ${c}.`, clearCity: "Show all cities", seeHere: "Show studies here",
   lgR: "Recruiting", lgS: "Coming soon", lgX: "Not recruiting", studies: n => n === 1 ? "1 study" : `${n} studies`,
-  more: n => `Show ${n} more`, none: "No studies match. Try a wider distance, another province, or fewer filters.",
+  more: n => `Show ${n} more`, none: "No studies match. Try a wider distance, another region, or fewer filters.",
   nearest: "Nearest site", sitesCa: (n, r) => `${n} ${n === 1 ? "site" : "sites"} ${COUNTRY.inName[0]} · ${r} recruiting`,
   ageRange: (a, b) => a == null && b == null ? "Any age" : b == null ? `Age ${a}+` : a == null ? `Up to age ${b}` : `Age ${a} to ${b}`,
   sexOnly: { F: "Women only", M: "Men only" }, healthy: "Also accepts healthy volunteers",
@@ -89,7 +101,7 @@ fr: {
   before: "Avant de commencer",
   b1: "Ceci est une version bêta. Ce n'est pas un avis médical.", b2: "Les résultats sont un premier tri. Seule l'équipe de l'étude peut confirmer votre admissibilité.",
   b3: "Les détails des études peuvent être dépassés. Le type de cancer et le stade sont détectés automatiquement et peuvent être erronés.",
-  b4: "Vos réponses restent dans cet onglet. Rien n'est enregistré ni transmis.", b5: "En cas d'urgence, composez le 911 ou rendez-vous à l'urgence la plus proche.",
+  b4: "Vos réponses restent dans cet onglet. Rien n'est enregistré ni transmis.", b5: `En cas d'urgence, composez le ${EMERG} ou rendez-vous à l'urgence la plus proche.`,
   consent: "J'ai lu et j'accepte les Conditions d'utilisation. Je comprends qu'il s'agit d'une version bêta, et non d'un avis médical, et que je dois tout confirmer avec mon équipe soignante.",
   readTerms: "Lire les conditions d'utilisation complètes",
   searchH: "Recherche", cat: "Type de cancer", catAny: "Tout type de cancer", many: "Afficher aussi les études ouvertes à plusieurs types de cancer",
@@ -105,7 +117,7 @@ fr: {
   mapNoTiles: "La carte n'est pas disponible ici; les études sont donc listées par ville.",
   cityAll: "Toutes les villes", atCity: c => `Études à ${c}.`, clearCity: "Afficher toutes les villes", seeHere: "Voir les études ici",
   lgR: "Recrute", lgS: "Bientôt", lgX: "Ne recrute pas", studies: n => n === 1 ? "1 étude" : `${n} études`,
-  more: n => `Afficher ${n} de plus`, none: "Aucune étude ne correspond. Essayez une plus grande distance, une autre province ou moins de filtres.",
+  more: n => `Afficher ${n} de plus`, none: "Aucune étude ne correspond. Essayez une plus grande distance, une autre région ou moins de filtres.",
   nearest: "Site le plus proche", sitesCa: (n, r) => `${n} site${n === 1 ? "" : "s"} ${COUNTRY.inName[1]} · ${r} recrute${r === 1 ? "" : "nt"}`,
   ageRange: (a, b) => a == null && b == null ? "Tout âge" : b == null ? `${a} ans et plus` : a == null ? `Jusqu'à ${b} ans` : `${a} à ${b} ans`,
   sexOnly: { F: "Femmes seulement", M: "Hommes seulement" }, healthy: "Accepte aussi des volontaires en santé",
@@ -134,43 +146,67 @@ fr: {
   trEn: "Les détails des études (titres, résumés, critères, noms de sites) sont affichés en anglais, comme dans le registre.", km: d => `${Math.round(toUnit(d))} ${UNIT}`, kmAway: d => `à ${Math.round(toUnit(d))} ${UNIT}`
 }};
 
-/* area and country wording */
-for (const [i, lg] of [[0, "en"], [1, "fr"]]) {
-  const x = T[lg];
-  x.sub = `${COUNTRY.name[i]} · ${A.short[i]} · ${i ? "Bêta" : "Beta"}`;
-  x.band = (n, d) => i ? `Bêta. Ne constitue pas un avis médical. Présente les ${n} ${A.studies[1]} ayant des sites ${COUNTRY.inName[1]} sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`
-                       : `Beta. Not medical advice. Lists all ${n} ${A.studies[0]} with sites ${COUNTRY.inName[0]} on ClinicalTrials.gov, updated daily (last update ${d}).`;
-  x.h1 = A.h1(COUNTRY.inName)[i]; x.lede = A.lede[i];
-  x.b3 = (i ? "Les détails des études peuvent être dépassés. " : "Study details may be out of date. ") + A.tagNote[i];
-  x.cat = A.catLabel[i]; x.catAny = A.catAny[i]; x.prov = COUNTRY.region[i]; x.provAny = COUNTRY.regionAny[i];
-  x.brand = A.brand[i];
-  const band = x.band;
-  x.band = (n, d) => band(n, d) + (META && META.hcOnly ? (i ? ` Comprend aussi ${META.hcOnly} essais autorisés par Santé Canada dont les sites canadiens ne sont pas encore publiés.`
-                                                            : ` Also includes ${META.hcOnly} trials authorized by Health Canada whose Canadian sites are not listed yet.`) : "");
-  x.studyContact = i ? "Contact principal de l'étude" : "Main study contact";
-  x.noStudyContact = i ? "Aucun contact principal dans le registre; voir les sites ci-dessous." : "No main contact in the registry; see the sites below.";
-  x.ivt = { drug: i ? "Médicament" : "Drug", bio: i ? "Produit biologique" : "Biologic", device: i ? "Instrument médical" : "Device",
-            proc: i ? "Intervention" : "Procedure", rad: i ? "Radiothérapie" : "Radiation", behav: i ? "Comportemental" : "Behavioural",
-            gene: i ? "Génétique" : "Genetic", diet: i ? "Supplément" : "Supplement", combo: i ? "Produit combiné" : "Combination product",
-            test: i ? "Test diagnostique" : "Diagnostic test" };
-  x.hcTag = i ? "Autorisé par Santé Canada" : "Authorized by Health Canada";
-  x.hcWhere = i ? "Canada · sites pas encore publiés" : "Canada · sites not listed yet";
-  x.hcFlag = i ? "Sites canadiens pas encore publiés" : "Canadian sites not listed yet";
-  x.hcFlagP = i ? "Santé Canada a autorisé cet essai au Canada, mais son dossier sur ClinicalTrials.gov n'indique pas encore de site canadien. Parlez-en à votre équipe soignante ou communiquez avec le promoteur."
-                : "Health Canada has authorized this trial in Canada, but its ClinicalTrials.gov record doesn't list a Canadian site yet. Ask your care team, or contact the sponsor.";
-  x.hcLink = i ? "Voir la fiche de Santé Canada" : "See the Health Canada record";
+/* wording that depends on the area, the country or the language */
+const XT = {
+en: { beta: "Beta", backAll: "← All sections", langL: "Language",
+  band: (n, d, st, inN) => `Beta. Not medical advice. Lists all ${n} ${st} with sites ${inN} on ClinicalTrials.gov, updated daily (last update ${d}).`,
+  b3pre: "Study details may be out of date. ",
+  hcBand: n => ` Also includes ${n} trials authorized by Health Canada whose Canadian sites are not listed yet.`,
+  studyContact: "Main study contact", noStudyContact: "No main contact in the registry; see the sites below.",
+  ivt: { drug: "Drug", bio: "Biologic", device: "Device", proc: "Procedure", rad: "Radiation", behav: "Behavioural", gene: "Genetic", diet: "Supplement", combo: "Combination product", test: "Diagnostic test" },
+  hcTag: "Authorized by Health Canada", hcWhere: "Canada · sites not listed yet", hcFlag: "Canadian sites not listed yet",
+  hcFlagP: "Health Canada has authorized this trial in Canada, but its ClinicalTrials.gov record doesn't list a Canadian site yet. Ask your care team, or contact the sponsor.",
+  hcLink: "See the Health Canada record",
+  sumTitle: "CLINICAL TRIALS TO DISCUSS WITH MY CARE TEAM", sumBy: (b, o, d) => `Prepared with ${b} (beta, ${o}) on ${d}.`,
+  sumNA: d => `This is not medical advice. Data from ClinicalTrials.gov as of ${d}.`, sumSite: "Site", sumNote: "Note",
+  sumQH: "QUESTIONS FOR MY DOCTOR",
+  sumQs: stage => ["Is any of these studies a good fit for my situation?", stage ? "Do my cancer type and stage match their criteria?" : "Does my condition match their criteria?",
+    "Would taking part delay my usual treatment?", "Can you refer me to the study team or contact them for me?"] },
+fr: { beta: "Bêta", backAll: "← Toutes les sections", langL: "Langue",
+  band: (n, d, st, inN) => `Bêta. Ne constitue pas un avis médical. Présente les ${n} ${st} ayant des sites ${inN} sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`,
+  b3pre: "Les détails des études peuvent être dépassés. ",
+  hcBand: n => ` Comprend aussi ${n} essais autorisés par Santé Canada dont les sites canadiens ne sont pas encore publiés.`,
+  studyContact: "Contact principal de l'étude", noStudyContact: "Aucun contact principal dans le registre; voir les sites ci-dessous.",
+  ivt: { drug: "Médicament", bio: "Produit biologique", device: "Instrument médical", proc: "Intervention", rad: "Radiothérapie", behav: "Comportemental", gene: "Génétique", diet: "Supplément", combo: "Produit combiné", test: "Test diagnostique" },
+  hcTag: "Autorisé par Santé Canada", hcWhere: "Canada · sites pas encore publiés", hcFlag: "Sites canadiens pas encore publiés",
+  hcFlagP: "Santé Canada a autorisé cet essai au Canada, mais son dossier sur ClinicalTrials.gov n'indique pas encore de site canadien. Parlez-en à votre équipe soignante ou communiquez avec le promoteur.",
+  hcLink: "Voir la fiche de Santé Canada",
+  sumTitle: "ESSAIS CLINIQUES À DISCUTER AVEC MON ÉQUIPE SOIGNANTE", sumBy: (b, o, d) => `Préparé avec ${b} (bêta, ${o}) le ${d}.`,
+  sumNA: d => `Ceci n'est pas un avis médical. Données de ClinicalTrials.gov au ${d}.`, sumSite: "Site", sumNote: "Attention",
+  sumQH: "QUESTIONS POUR MON MÉDECIN",
+  sumQs: stage => ["Une de ces études est-elle adaptée à ma situation?", stage ? "Mon type et mon stade de cancer correspondent-ils à leurs critères?" : "Ma situation correspond-elle à leurs critères?",
+    "Participer retarderait-il mon traitement habituel?", "Pouvez-vous me diriger vers l'équipe de l'étude ou la contacter pour moi?"] }
+};
+if (typeof T_EXTRA !== "undefined") Object.assign(T, T_EXTRA);
+if (typeof XT_EXTRA !== "undefined") Object.assign(XT, XT_EXTRA);
+for (const lg of Object.keys(T)) {
+  const i = LI(lg), x = T[lg], y = XT[lg] || XT.en;
+  x.sub = `${P(COUNTRY.name, i)} · ${P(A.short, i)} · ${y.beta}`;
+  x.band = (n, d) => y.band(n, d, P(A.studies, i), P(COUNTRY.inName, i)) + (META && META.hcOnly ? y.hcBand(META.hcOnly) : "");
+  x.h1 = P(A.h1(COUNTRY.inName), i); x.lede = P(A.lede, i);
+  x.b3 = y.b3pre + P(A.tagNote, i);
+  x.cat = P(A.catLabel, i); x.catAny = P(A.catAny, i); x.prov = P(COUNTRY.region, i); x.provAny = P(COUNTRY.regionAny, i);
+  x.brand = P(A.brand, i);
+  x.backAll = y.backAll; x.langL = y.langL;
+  for (const k of ["studyContact", "noStudyContact", "ivt", "hcTag", "hcWhere", "hcFlag", "hcFlagP", "hcLink"]) x[k] = y[k];
+  x.sumX = y;
 }
 
 /* ---------- state ---------- */
-const S = { lang: "en", view: "gate", consent: false, legal: "terms", prev: "gate", sort: "best", shown: 20, city: null,
+const LANG0 = (() => {
+  try { const q = new URLSearchParams(location.search).get("lang"); if (COUNTRY.langs.includes(q)) return q; } catch (e) {}
+  try { const m = localStorage.getItem("ctf-lang"); if (COUNTRY.langs.includes(m)) return m; } catch (e) {}
+  return COUNTRY.langs[0]; })();
+const saveLang = l => { try { localStorage.setItem("ctf-lang", l); } catch (e) {} };
+const S = { lang: LANG0, view: "gate", consent: false, legal: "terms", prev: "gate", sort: "best", shown: 20, city: null,
   saved: new Set(), open: new Set(), showHidden: false,
   f: { cat: "", many: A.many, prov: "", near: "", lat: null, lon: null, loc: false, dist: "100", age: "", sex: "", spread: "", stage: "", kinds: { treat: true, diag: true, support: true, obs: true }, closed: false } };
 let ROWS = [], META = null, EIDX = {}, ELIG = new Map(), CITIES = new Map(), PROVS = [], DETAIL = new Map(), LIVE = null;
 const t = k => T[S.lang][k];
-const LG = pair => pair[S.lang === "fr" ? 1 : 0];
+const LG = pair => P(pair, LI(S.lang));
 const provName = p => S.lang === "fr" ? (PROV_FR[p] || p) : p;
 const fmtDate = d => { if (!d) return ""; const x = new Date((d.length === 7 ? d + "-01" : d) + "T12:00:00");
-  return x.toLocaleDateString(COUNTRY.locale[S.lang === "fr" ? 1 : 0], d.length === 7 ? { year: "numeric", month: "long" } : { year: "numeric", month: "short", day: "numeric" }); };
+  return x.toLocaleDateString(LOC(S.lang), d.length === 7 ? { year: "numeric", month: "long" } : { year: "numeric", month: "short", day: "numeric" }); };
 const cityKey = (c, p) => (c || "").trim().toLowerCase() + "|" + (p || "");
 
 /* ---------- data ---------- */
@@ -271,11 +307,17 @@ const app = $("app");
 function render(keepScroll) {
   document.documentElement.lang = S.lang;
   $("brandName").textContent = t("brand"); document.title = t("brand"); $("brandSub").textContent = t("sub");
-  $("langGroup").hidden = COUNTRY.langs.length < 2; if (COUNTRY.langs.length < 2) S.lang = "en"; $("demoPill").textContent = t("pill");
+  const lgBox = $("langGroup"); lgBox.hidden = COUNTRY.langs.length < 2; if (!COUNTRY.langs.includes(S.lang)) S.lang = COUNTRY.langs[0];
+  lgBox.innerHTML = COUNTRY.langs.map(l => `<button type="button" data-lang="${l}" lang="${l}" aria-pressed="${S.lang === l}">${l.toUpperCase()}</button>`).join("");
+  lgBox.setAttribute("aria-label", t("langL"));
+  lgBox.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => { S.lang = b.dataset.lang; saveLang(S.lang); render(true); });
+  let back = $("backLink");
+  if (!back) { back = document.createElement("a"); back.id = "backLink"; back.className = "backlink"; document.querySelector("header.top .wrap").prepend(back); }
+  back.href = "../" + (S.lang !== COUNTRY.langs[0] ? `?lang=${S.lang}` : ""); back.textContent = t("backAll");
+  $("demoPill").textContent = t("pill");
   $("demoBand").textContent = META ? t("band")(META.studies, fmtDate(META.built.slice(0, 10))) : t("loading");
   $("f-terms").textContent = t("fTerms"); $("f-privacy").textContent = t("fPriv"); $("f-data").textContent = t("fData");
   $("footNote").textContent = t("foot")();
-  $("lang-en").setAttribute("aria-pressed", S.lang === "en"); $("lang-fr").setAttribute("aria-pressed", S.lang === "fr");
   dropMap();
   if (!ROWS.length && S.view !== "legal") { app.innerHTML = `<section class="panel"><p class="lede">${esc(t("loading"))}</p></section>`; return; }
   ({ gate: vGate, results: vResults, summary: vSummary, legal: vLegal })[S.view]();
@@ -299,8 +341,8 @@ function formHTML(compact) {
       <input id="f-near" list="f-cities" autocomplete="off" placeholder="${esc(t("nearPh"))}" value="${esc(f.loc ? t("locOn") : f.near)}"><datalist id="f-cities">${cityList}</datalist></div>
      <div><label for="f-dist">${esc(t("dist"))}</label><select id="f-dist">${dists.map(d => `<option value="${d}" ${f.dist === d ? "selected" : ""}>${d === "any" ? esc(t("distAny")) : d + " " + UNIT}</option>`).join("")}</select></div></div>
     <button type="button" class="linkish" id="f-loc">${esc(t("useLoc"))}</button> <span class="help" id="locMsg" role="status"></span>
-    <label for="f-prov">${esc(t("prov"))}</label>
-    <select id="f-prov" ${f.lat != null ? "disabled" : ""}><option value="">${esc(t("provAny"))}</option>${PROVS.map(p => `<option value="${esc(p)}" ${f.prov === p ? "selected" : ""}>${esc(provName(p))}</option>`).join("")}</select></fieldset>
+    <label for="f-prov" ${PROVS.length ? "" : "hidden"}>${esc(t("prov"))}</label>
+    <select id="f-prov" ${PROVS.length ? "" : "hidden"} ${f.lat != null ? "disabled" : ""}><option value="">${esc(t("provAny"))}</option>${PROVS.map(p => `<option value="${esc(p)}" ${f.prov === p ? "selected" : ""}>${esc(provName(p))}</option>`).join("")}</select></fieldset>
    <fieldset class="grp"><legend>${esc(t("about"))}</legend>
     <div class="three"><div><label for="f-age">${esc(t("age"))}</label><input id="f-age" type="number" min="0" max="120" inputmode="numeric" value="${esc(f.age)}"></div>
      <div><label for="f-sex">${esc(t("sex"))}</label><select id="f-sex"><option value="">${esc(t("sexAny"))}</option><option value="F" ${f.sex === "F" ? "selected" : ""}>${esc(t("female"))}</option><option value="M" ${f.sex === "M" ? "selected" : ""}>${esc(t("male"))}</option></select></div>
@@ -401,11 +443,11 @@ function renderResultsBody() {
 }
 
 /* ---------- trial card ---------- */
-function statusBadge(code) { const s = SITE[code] || SITE.STOP; return `<span class="badge ${s[2]}">${esc(S.lang === "fr" ? s[1] : s[0])}</span>`; }
+function statusBadge(code) { const s = SITE[code] || SITE.STOP; return `<span class="badge ${s[1]}">${esc(LG(s[0]))}</span>`; }
 function card(e) {
   const r = e.r, b = e.best;
   const tags = [`<span class="tag ${r.k === "treat" ? "" : "other"}">${esc(LG(KIND[r.k]))}</span>`];
-  if (r.ph) tags.push(`<span class="tag other">${esc((S.lang === "fr" ? "Phase " : "Phase ") + r.ph)}</span>`);
+  if (r.ph) tags.push(`<span class="tag other">${esc("Phase " + r.ph)}</span>`);
   for (const v of r.iv || []) if (t("ivt")[v]) tags.push(`<span class="tag iv${v === "drug" || v === "bio" ? " drug" : ""}">${esc(t("ivt")[v])}</span>`);
   if (r.hc) tags.push(`<span class="tag hc">${esc(t("hcTag"))}</span>`);
   const cats = r.c.map(c => CAT[c] ? LG(CAT[c]) : c).join(" · ");
@@ -603,27 +645,26 @@ function startLiveMap() {
 
 /* ---------- summary ---------- */
 function buildSummary() {
-  const fr = S.lang === "fr", lines = [];
+  const y = t("sumX"), lines = [];
   const items = [...S.saved].map(id => ROWS.find(r => r.id === id)).filter(Boolean);
-  lines.push(fr ? "ESSAIS CLINIQUES À DISCUTER AVEC MON ÉQUIPE SOIGNANTE" : "CLINICAL TRIALS TO DISCUSS WITH MY CARE TEAM");
-  lines.push((fr ? `Préparé avec ${A.brand[1]} (bêta, ` : `Prepared with ${A.brand[0]} (beta, `) + ORG.name + (fr ? ") le " : ") on ") + fmtDate(new Date().toISOString().slice(0, 10)) + ".");
-  lines.push(fr ? `Ceci n'est pas un avis médical. Données de ClinicalTrials.gov au ${fmtDate(META.built.slice(0, 10))}.` : `This is not medical advice. Data from ClinicalTrials.gov as of ${fmtDate(META.built.slice(0, 10))}.`);
+  lines.push(y.sumTitle);
+  lines.push(y.sumBy(t("brand"), ORG.name, fmtDate(new Date().toISOString().slice(0, 10))));
+  lines.push(y.sumNA(fmtDate(META.built.slice(0, 10))));
   lines.push("");
   items.forEach((r, i) => {
     const e = evaluate(r) || { open: [], best: null, flags: [] };
     lines.push(`${i + 1}. ${r.t} (${r.id}${r.ph ? ", Phase " + r.ph : ""}, ${LG(KIND[r.k])})`);
     const b = e.best || { s: r.s.find(s => OPEN(s[3])) || r.s[0] };
     if (r.hc && !r.s.length) lines.push(`   ${t("hcTag")}: ${t("hcWhere")}`);
-    if (b.s) lines.push(`   ${fr ? "Site" : "Site"}: ${b.s[0]}, ${b.s[1]} – ${SITE[b.s[3]] ? LG([SITE[b.s[3]][0], SITE[b.s[3]][1]]) : ""}`);
+    if (b.s) lines.push(`   ${y.sumSite}: ${b.s[0]}, ${b.s[1]} – ${SITE[b.s[3]] ? LG(SITE[b.s[3]][0]) : ""}`);
     const d = DETAIL.get(r.id); if (d) { const s = d.sites.find(x => x.f === b.s?.[0] && x.city === b.s?.[1]); const c = s?.c || (d.central || [])[0]; if (c) lines.push(`   Contact: ${c}`); }
     if (r.cc) lines.push(`   ${t("studyContact")}: ${r.cc}`);
-    if (e.flags?.length) lines.push(`   ${fr ? "Attention" : "Note"}: ${e.flags.join(" ")}`);
+    if (e.flags?.length) lines.push(`   ${y.sumNote}: ${e.flags.join(" ")}`);
     lines.push(`   https://clinicaltrials.gov/study/${r.id}`);
   });
   lines.push("");
-  lines.push(fr ? "QUESTIONS POUR MON ONCOLOGUE" : "QUESTIONS FOR MY ONCOLOGIST");
-  (fr ? ["Une de ces études est-elle adaptée à ma situation?", (A.stage ? "Mon type et mon stade de cancer correspondent-ils à leurs critères?" : "Ma situation correspond-elle à leurs critères?"), "Participer retarderait-il mon traitement habituel?", "Pouvez-vous me diriger vers l'équipe de l'étude ou un(e) infirmier(ère) de recherche?", "Y a-t-il d'autres études à envisager?"]
-      : ["Is any of these studies a good fit for my situation?", (A.stage ? "Do my cancer type and stage match their criteria?" : "Does my condition match their criteria?"), "Would taking part delay my usual treatment?", "Can you refer me to the study team or a research nurse?", "Are there other studies I should consider?"]).forEach(q => lines.push("- " + q));
+  lines.push(y.sumQH);
+  y.sumQs(A.stage).forEach(q => lines.push("- " + q));
   return lines.join("\n");
 }
 async function vSummary() {
@@ -640,13 +681,11 @@ async function vSummary() {
 /* ---------- legal ---------- */
 function vLegal() {
   app.innerHTML = `<section class="panel legal"><div class="tabs" role="group">${["terms", "privacy", "data"].map(k => `<button data-tab="${k}" aria-pressed="${S.legal === k}">${esc(t(k === "terms" ? "fTerms" : k === "privacy" ? "fPriv" : "fData"))}</button>`).join("")}</div>
-    ${LEGAL[S.lang][S.legal]()}<div class="row"><button class="btn ghost" id="legalBack">${esc(t("legalBack"))}</button></div></section>`;
+    ${(LEGAL[S.lang] || LEGAL.en)[S.legal]()}<div class="row"><button class="btn ghost" id="legalBack">${esc(t("legalBack"))}</button></div></section>`;
   app.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { S.legal = b.dataset.tab; render(); });
   $("legalBack").onclick = () => { S.view = S.prev; render(); };
 }
 function openLegal(k) { if (S.view !== "legal") S.prev = S.view; S.legal = k; S.view = "legal"; render(); }
 
-$("lang-en").onclick = () => { S.lang = "en"; render(true); };
-$("lang-fr").onclick = () => { S.lang = "fr"; render(true); };
 document.querySelectorAll("[data-legal]").forEach(b => b.onclick = () => openLegal(b.dataset.legal));
 render(); load();

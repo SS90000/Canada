@@ -259,3 +259,10 @@ a.areacard .go{margin-top:auto;color:var(--accent);font-weight:600}
 .trial .contact span{min-width:0;overflow-wrap:anywhere}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.iv.drug{background:#3a2515;color:#f6c79b;border-color:#6b4123}}
 :root[data-theme="dark"] .tag.iv.drug{background:#3a2515;color:#f6c79b;border-color:#6b4123}
+header.top .wrap{flex-wrap:wrap}
+.backlink{flex-basis:100%;font-size:.88rem;font-weight:600;color:var(--accent);text-decoration:none;padding:2px 0 6px}
+.backlink:hover{text-decoration:underline}
+.langpick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+.langpick span{font-weight:600;margin-right:4px}
+.langpick button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:.92rem;min-height:36px}
+.langpick button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
