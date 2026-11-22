@@ -117,8 +117,8 @@ NEURO = [
     ("neuromuscular", r"neuromuscular|myasthenia|muscular dystroph|duchenne|(?<!cardio)myopath|myositis|neuropath|guillain|\bcidp\b|charcot[- ]marie|polyneuropath|peripheral nervous system"),
     ("injury", r"brain injur|craniocerebral trauma|head injur|concussion|spinal cord injur|traumatic brain|\btbi\b"),
     ("braintumour", r"glioma|glioblastoma|astrocytoma|medulloblastoma|ependymoma|meningioma|brain (?:tumou?r|neoplasm|metasta|cancer)|central nervous system neoplasm|leptomening|brain neoplasm"),
-    ("sleep", r"sleep wake disorder|narcolepsy|insomnia|sleep apnea|hypersomnia|circadian"),
-    ("childneuro", r"cerebral palsy|hydrocephalus|spina bifida|neural tube|rett|angelman|leukodystroph|neurodevelopmental disorder"),
+    ("sleep", r"sleep wake disorder|narcolepsy|insomnia|central sleep apnea|hypersomnia|circadian rhythm sleep|restless legs|parasomnia|rem sleep behavio"),
+    ("childneuro", r"cerebral palsy|hydrocephalus|spina bifida|neural tube|rett|angelman|leukodystroph|neurodevelopmental disorder|autis|attention deficit|\\badhd\\b"),
     ("neuroinfect", r"encephalitis|meningitis|neuroinflamm|autoimmune encephal"),
     ("generalneuro", r"central nervous system diseases|brain diseases|nervous system malformation|neurodegenerative|spinal cord diseases|cranial nerve|vestibular|vertigo|neurologic disorder|neurological disorder"),
 ]
@@ -219,7 +219,8 @@ RARE_STOP = {"disease", "syndrome", "malformation syndrome", "clinical group", "
              "obesity", "hypertension", "anemia", "anaemia", "infertility", "deafness", "epilepsy", "dementia", "stroke",
              "asthma", "diabetes mellitus", "arthritis", "cardiomyopathy", "neuropathy", "lymphoma", "leukemia", "leukaemia",
              "sarcoma", "carcinoma", "adenocarcinoma", "glioma", "myopathy", "pain", "fever", "short stature", "autism",
-             "intellectual disability", "alopecia", "spinal cord injury", "rare disease", "rare tumor", "rare cancer", "rare genetic disease", "head and neck cancer"}
+             "intellectual disability", "alopecia", "spinal cord injury", "non hodgkin lymphoma", "renal cell carcinoma",
+             "clear cell renal cell carcinoma", "squamous cell carcinoma of head and neck", "head and neck squamous cell carcinoma", "rare disease", "rare tumor", "rare cancer", "rare genetic disease", "head and neck cancer"}
 
 
 def norm_name(t):
@@ -375,6 +376,12 @@ def not_included_counts():
 RARE_OTHER = {"heart", "lung", "metabolic", "digestive", "kidney", "immune", "skin", "blood", "musculoskeletal", "eyeent", "genetic", "infection"}
 
 
+AF_PREVENT = re.compile(r"atrial fibrillation|atrial flutter|left atrial appendage|anticoagula", re.I)
+STROKE_CARE = re.compile(r"acute (?:ischemic )?stroke|stroke (?:survivor|patient|rehab|recover|unit)|after (?:a |an )?stroke|post-?stroke|"
+                         r"intracerebral|subarachnoid|thrombectomy|thrombolysis|cryptogenic stroke|embolic stroke of undetermined", re.I)
+NEURODEV = re.compile(r"autis|attention deficit|\badhd\b", re.I)
+
+
 def classify(ident, conds, meshes, ancestors, healthy):
     """Return {area: [categories]} for the areas this study belongs to."""
     base = " | ".join([ident.get("briefTitle", ""), ident.get("officialTitle", ""),
@@ -394,11 +401,14 @@ def classify(ident, conds, meshes, ancestors, healthy):
     if onc:
         out["oncology"] = onc
     neuro = [k for k, rx in NEURO_RE if rx.search(ntext)]  # broad MeSH ancestors pulled in psychiatry, ICU and pain studies
+    # atrial fibrillation studies that only aim to prevent stroke are heart studies
+    if "stroke" in neuro and AF_PREVENT.search(ntext) and not STROKE_CARE.search(ntext):
+        neuro.remove("stroke")
     if len(neuro) > 1 and "generalneuro" in neuro:
         neuro.remove("generalneuro")  # only use the catch-all when nothing more specific matched
     if neuro:
         out["neurology"] = neuro
-    if not out:
+    if not out or set(neuro) <= {"childneuro"} and NEURODEV.search(ntext):
         other = [k for k, rx in OTHER_RE if rx.search(full)]
         if healthy and "healthy" not in other and re.search(r"healthy", base, re.I):
             other.append("healthy")
