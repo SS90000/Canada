@@ -1,11 +1,11 @@
 {
- "built": "2026-11-21T10:13:11Z",
+ "built": "2026-11-22T07:12:40Z",
  "country": "Canada",
  "area": "oncology",
- "studies": 1245,
+ "studies": 1248,
  "registryTotal": 4135,
  "sites": 3587,
- "hcOnly": 114,
+ "hcOnly": 117,
  "categories": {
   "breast": 156,
   "prostate": 134,
@@ -15,9 +15,9 @@
   "myeloma": 58,
   "general": 80,
   "childhood": 64,
-  "lung": 185,
+  "lung": 187,
   "sarcoma": 47,
-  "solid": 161,
+  "solid": 162,
   "gyn": 126,
   "upperGI": 48,
   "skin": 56,
@@ -34,7 +34,7 @@
  },
  "kinds": {
   "obs": 144,
-  "treat": 905,
+  "treat": 908,
   "diag": 51,
   "support": 145
  },
