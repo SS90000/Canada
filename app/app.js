@@ -13,6 +13,11 @@ const toUnit = d => MI ? d * 0.621371 : d;            /* km to the display unit 
 const fromUnit = d => MI ? d / 0.621371 : d;          /* display unit to km */
 const UNIT = MI ? "mi" : "km";
 const OPEN = s => s === "R" || s === "NYR";
+/* which registry a study comes from, by its number: [name, link] */
+const REG = id => /^NCT/.test(id) ? ["ClinicalTrials.gov", "https://clinicaltrials.gov/study/" + id]
+  : /^ISRCTN/.test(id) ? ["ISRCTN", "https://www.isrctn.com/" + id]
+  : ["EU CTIS", "https://euclinicaltrials.eu/search-for-clinical-trials/?lang=en&EUCT=" + encodeURIComponent(id)];
+const SOURCES = () => { const o = (META && (META.bySource || META.otherRegistries)) || {}; return ["ClinicalTrials.gov", o.ctis ? "EU CTIS" : "", o.isrctn ? "ISRCTN" : ""].filter(Boolean).join(" + "); };
 const KIND_ORDER = { treat: 0, diag: 1, support: 2, obs: 3 };
 const BLOOD = new Set(["leukemia", "lymphoma", "myeloma"]);
 /* languages: every label list is [English, French, German, Italian, Spanish]; a shorter list falls back to English */
@@ -182,7 +187,7 @@ if (typeof XT_EXTRA !== "undefined") Object.assign(XT, XT_EXTRA);
 for (const lg of Object.keys(T)) {
   const i = LI(lg), x = T[lg], y = XT[lg] || XT.en;
   x.sub = `${P(COUNTRY.name, i)} · ${P(A.short, i)} · ${y.beta}`;
-  x.band = (n, d) => y.band(n, d, P(A.studies, i), P(COUNTRY.inName, i)) + (META && META.hcOnly ? y.hcBand(META.hcOnly) : "");
+  x.band = (n, d) => y.band(n, d, P(A.studies, i), P(COUNTRY.inName, i)).replace("ClinicalTrials.gov", SOURCES()) + (META && META.hcOnly ? y.hcBand(META.hcOnly) : "");
   x.h1 = P(A.h1(COUNTRY.inName), i); x.lede = P(A.lede, i);
   x.b3 = y.b3pre + P(A.tagNote, i);
   x.cat = P(A.catLabel, i); x.catAny = P(A.catAny, i); x.prov = P(COUNTRY.region, i); x.provAny = P(COUNTRY.regionAny, i);
@@ -450,6 +455,7 @@ function card(e) {
   if (r.ph) tags.push(`<span class="tag other">${esc("Phase " + r.ph)}</span>`);
   for (const v of r.iv || []) if (t("ivt")[v]) tags.push(`<span class="tag iv${v === "drug" || v === "bio" ? " drug" : ""}">${esc(t("ivt")[v])}</span>`);
   if (r.hc) tags.push(`<span class="tag hc">${esc(t("hcTag"))}</span>`);
+  if (!/^NCT/.test(r.id)) tags.push(`<span class="tag src">${esc(REG(r.id)[0])}</span>`);
   const cats = r.c.map(c => CAT[c] ? LG(CAT[c]) : c).join(" · ");
   const flags = [];
   if (e.hc) flags.push(`<div class="flag soon"><b>${esc(t("hcFlag"))}.</b><span>${esc(t("hcFlagP"))}</span></div>`);
@@ -555,7 +561,7 @@ function detailHTML(id, e) {
       ${sites.length > 6 ? `<details class="moresites"><summary>${esc(t("allN")(sites.length))}</summary><div class="sites">${sites.slice(6).map(siteHTML).join("")}</div></details>` : ""}</div>`}
     <details class="dsec"><summary>${esc(t("eligH"))}</summary><div class="crit" lang="en">${critHTML(d.criteria)}</div></details>
     <p class="dates">${esc(t("sponsor"))}: ${esc(d.sponsor)} · ${esc(t("started"))}: ${esc(fmtDate(d.start))} · ${esc(t("recUpd"))}: ${esc(fmtDate(d.upd))}</p>
-    <p><a href="https://clinicaltrials.gov/study/${esc(id)}" target="_blank" rel="noopener">${esc(t("registry"))}</a></p>`;
+    <p><a href="${esc(REG(id)[1])}" target="_blank" rel="noopener">${esc(t("registry").replace("ClinicalTrials.gov", REG(id)[0]))}</a></p>`;
 }
 function bindCopy(root) {
   root.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => {
@@ -649,7 +655,7 @@ function buildSummary() {
   const items = [...S.saved].map(id => ROWS.find(r => r.id === id)).filter(Boolean);
   lines.push(y.sumTitle);
   lines.push(y.sumBy(t("brand"), ORG.name, fmtDate(new Date().toISOString().slice(0, 10))));
-  lines.push(y.sumNA(fmtDate(META.built.slice(0, 10))));
+  lines.push(y.sumNA(fmtDate(META.built.slice(0, 10))).replace("ClinicalTrials.gov", SOURCES()));
   lines.push("");
   items.forEach((r, i) => {
     const e = evaluate(r) || { open: [], best: null, flags: [] };
@@ -660,7 +666,7 @@ function buildSummary() {
     const d = DETAIL.get(r.id); if (d) { const s = d.sites.find(x => x.f === b.s?.[0] && x.city === b.s?.[1]); const c = s?.c || (d.central || [])[0]; if (c) lines.push(`   Contact: ${c}`); }
     if (r.cc) lines.push(`   ${t("studyContact")}: ${r.cc}`);
     if (e.flags?.length) lines.push(`   ${y.sumNote}: ${e.flags.join(" ")}`);
-    lines.push(`   https://clinicaltrials.gov/study/${r.id}`);
+    lines.push(`   ${REG(r.id)[1]}`);
   });
   lines.push("");
   lines.push(y.sumQH);
