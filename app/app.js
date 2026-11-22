@@ -147,6 +147,12 @@ for (const [i, lg] of [[0, "en"], [1, "fr"]]) {
   const band = x.band;
   x.band = (n, d) => band(n, d) + (META && META.hcOnly ? (i ? ` Comprend aussi ${META.hcOnly} essais autorisés par Santé Canada dont les sites canadiens ne sont pas encore publiés.`
                                                             : ` Also includes ${META.hcOnly} trials authorized by Health Canada whose Canadian sites are not listed yet.`) : "");
+  x.studyContact = i ? "Contact principal de l'étude" : "Main study contact";
+  x.noStudyContact = i ? "Aucun contact principal dans le registre; voir les sites ci-dessous." : "No main contact in the registry; see the sites below.";
+  x.ivt = { drug: i ? "Médicament" : "Drug", bio: i ? "Produit biologique" : "Biologic", device: i ? "Instrument médical" : "Device",
+            proc: i ? "Intervention" : "Procedure", rad: i ? "Radiothérapie" : "Radiation", behav: i ? "Comportemental" : "Behavioural",
+            gene: i ? "Génétique" : "Genetic", diet: i ? "Supplément" : "Supplement", combo: i ? "Produit combiné" : "Combination product",
+            test: i ? "Test diagnostique" : "Diagnostic test" };
   x.hcTag = i ? "Autorisé par Santé Canada" : "Authorized by Health Canada";
   x.hcWhere = i ? "Canada · sites pas encore publiés" : "Canada · sites not listed yet";
   x.hcFlag = i ? "Sites canadiens pas encore publiés" : "Canadian sites not listed yet";
@@ -400,6 +406,7 @@ function card(e) {
   const r = e.r, b = e.best;
   const tags = [`<span class="tag ${r.k === "treat" ? "" : "other"}">${esc(LG(KIND[r.k]))}</span>`];
   if (r.ph) tags.push(`<span class="tag other">${esc((S.lang === "fr" ? "Phase " : "Phase ") + r.ph)}</span>`);
+  for (const v of r.iv || []) if (t("ivt")[v]) tags.push(`<span class="tag iv${v === "drug" || v === "bio" ? " drug" : ""}">${esc(t("ivt")[v])}</span>`);
   if (r.hc) tags.push(`<span class="tag hc">${esc(t("hcTag"))}</span>`);
   const cats = r.c.map(c => CAT[c] ? LG(CAT[c]) : c).join(" · ");
   const flags = [];
@@ -423,6 +430,7 @@ function card(e) {
     ${b ? `<div class="nearest">${statusBadge(b.s[3])}<span><b>${esc(b.s[0])}</b>, ${esc(b.s[1])}${b.s[2] ? ", " + esc(provName(b.s[2])) : ""}${b.d != null ? ` · ${esc(t("kmAway")(b.d))}` : ""}</span></div>` : ""}
     ${e.hc ? "" : `<p class="help">${esc(t("sitesCa")(r.s.length, nRec))}</p>`}
     <p class="elig">${esc(elig.join(" · "))}${ext ? " · " + ext : ""}</p>
+    <p class="contact"><b>${esc(t("studyContact"))}:</b> ${r.cc ? `<span>${esc(r.cc)}</span> <button class="btn ghost small" data-copy="${esc(r.cc)}">${esc(t("copy"))}</button>` : `<span class="help">${esc(t("noStudyContact"))}</span>`}</p>
     ${flags.join("")}
     <div class="row"><button class="btn ghost small" data-open="${r.id}" aria-expanded="${open}">${esc(open ? t("hide") : t("details"))}</button>
       <button class="btn ${saved ? "" : "ghost "}small" data-save="${r.id}" aria-pressed="${saved}">${esc(saved ? t("saved") : t("save"))}</button></div>
@@ -445,7 +453,7 @@ function bindCards() {
     const on = S.saved.has(id); b.textContent = on ? t("saved") : t("save"); b.setAttribute("aria-pressed", on); b.classList.toggle("ghost", !on);
     const ml = $("myList"); if (ml) ml.textContent = t("myList")(S.saved.size);
   });
-  app.querySelectorAll(".detail:not([hidden])").forEach(bindCopy);
+  bindCopy(app);
 }
 async function getElig(id) {
   if (ELIG.has(id)) return ELIG.get(id);
@@ -509,7 +517,7 @@ function detailHTML(id, e) {
 }
 function bindCopy(root) {
   root.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => {
-    const code = b.closest(".site").querySelector("code"), orig = b.textContent;
+    const box = b.closest(".site, .contact, p") || b.parentElement, code = box.querySelector("code, span") || box, orig = b.textContent;
     const sel = () => { try { const r = document.createRange(); r.selectNodeContents(code); const s = getSelection(); s.removeAllRanges(); s.addRange(r); } catch (e) {} };
     try { navigator.clipboard.writeText(b.dataset.copy).then(() => { b.textContent = t("copied"); setTimeout(() => b.textContent = orig, 1500); }, sel); } catch (e) { sel(); }
   });
@@ -608,6 +616,7 @@ function buildSummary() {
     if (r.hc && !r.s.length) lines.push(`   ${t("hcTag")}: ${t("hcWhere")}`);
     if (b.s) lines.push(`   ${fr ? "Site" : "Site"}: ${b.s[0]}, ${b.s[1]} – ${SITE[b.s[3]] ? LG([SITE[b.s[3]][0], SITE[b.s[3]][1]]) : ""}`);
     const d = DETAIL.get(r.id); if (d) { const s = d.sites.find(x => x.f === b.s?.[0] && x.city === b.s?.[1]); const c = s?.c || (d.central || [])[0]; if (c) lines.push(`   Contact: ${c}`); }
+    if (r.cc) lines.push(`   ${t("studyContact")}: ${r.cc}`);
     if (e.flags?.length) lines.push(`   ${fr ? "Attention" : "Note"}: ${e.flags.join(" ")}`);
     lines.push(`   https://clinicaltrials.gov/study/${r.id}`);
   });

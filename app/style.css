@@ -253,3 +253,9 @@ a.areacard b{font-family:var(--font-display);font-size:1.25rem}
 a.areacard .n{font-size:1.6rem;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
 a.areacard span{color:var(--muted);font-size:.92rem}
 a.areacard .go{margin-top:auto;color:var(--accent);font-weight:600}
+.tag.iv{background:var(--chip,#eef2f6);color:inherit;border:1px solid var(--line,#d6dee9)}
+.tag.iv.drug{background:#fdf2e9;color:#7a3e0e;border-color:#f3c9a3}
+.trial .contact{margin:.35rem 0;font-size:.92rem;display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.trial .contact span{min-width:0;overflow-wrap:anywhere}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag.iv.drug{background:#3a2515;color:#f6c79b;border-color:#6b4123}}
+:root[data-theme="dark"] .tag.iv.drug{background:#3a2515;color:#f6c79b;border-color:#6b4123}

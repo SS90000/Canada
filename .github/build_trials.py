@@ -184,6 +184,9 @@ def region(state, zipc):
 ADV = re.compile(r"metasta(?:tic|sis|ses)|advanced|unresectable|inoperable|stage\s*(?:iv|4)\b|recurren|refractory|relapsed", re.I)
 EARLY = re.compile(r"early[- ]stage|early (?:breast|lung|prostate|cancer)|stage\s*(?:0|i|ii|iii|1|2|3)\b|stages?\s*(?:i|1)\s*(?:-|–|to)\s*(?:iii|3)|resectable|resected|\badjuvant|neoadjuvant|locali[sz]ed|non-?metastatic|curative", re.I)
 NOT_ADV = re.compile(r"(?:no|without|absence of|free of)\s+(?:evidence of\s+)?(?:distant\s+)?metasta", re.I)
+IVT = {"DRUG": "drug", "BIOLOGICAL": "bio", "DEVICE": "device", "PROCEDURE": "proc", "RADIATION": "rad",
+       "BEHAVIORAL": "behav", "GENETIC": "gene", "DIETARY_SUPPLEMENT": "diet", "COMBINATION_PRODUCT": "combo",
+       "DIAGNOSTIC_TEST": "test", "OTHER": "other"}
 KIND = {"TREATMENT": "treat", "DIAGNOSTIC": "diag", "SCREENING": "diag", "SUPPORTIVE_CARE": "support",
         "PREVENTION": "support", "HEALTH_SERVICES_RESEARCH": "support", "BASIC_SCIENCE": "support",
         "OTHER": "support", "DEVICE_FEASIBILITY": "support", "ECT": "support"}
@@ -470,7 +473,9 @@ def build(st, hc=None):
            "upd": (status.get("lastUpdatePostDateStruct") or {}).get("date", ""),
            "pcd": (status.get("primaryCompletionDateStruct") or {}).get("date", ""),
            "sp": (p.get("sponsorCollaboratorsModule", {}).get("leadSponsor") or {}).get("name", ""),
-           "sites": sites}
+           "sites": sites,
+           "cc": next((x for x in (contact_of(c) for c in (cl.get("centralContacts") or [])) if x), ""),
+           "iv": sorted({IVT.get(i.get("type", ""), "other") for i in (p.get("armsInterventionsModule", {}) or {}).get("interventions", [])})}
     if hc:
         row["hc"] = hc["ctrl"]
         row["os"] = SITE_ST.get(status.get("overallStatus", ""), "R")
@@ -543,6 +548,10 @@ def write_area(area, rows, built, total):
             s.append([fidx[x["f"]], cidx[ck], x["s"]])
         row = {k: r[k] for k in ("id", "t", "ac", "k", "ph", "sx", "a0", "a1", "hv", "upd", "pcd", "sp")}
         row["c"] = r["areas"][area]
+        if r.get("cc"):
+            row["cc"] = r["cc"]
+        if r.get("iv"):
+            row["iv"] = r["iv"]
         if area == "oncology":
             row["x"] = r["x"]
         if r.get("hc"):
