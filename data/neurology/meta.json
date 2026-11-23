@@ -1,10 +1,10 @@
 {
- "built": "2026-11-23T02:30:35Z",
+ "built": "2026-11-23T05:20:27Z",
  "country": "Canada",
  "area": "neurology",
- "studies": 678,
+ "studies": 672,
  "registryTotal": 4135,
- "sites": 1391,
+ "sites": 1375,
  "hcOnly": 48,
  "categories": {
   "stroke": 108,
@@ -12,7 +12,7 @@
   "childneuro": 63,
   "dementia": 123,
   "movement": 74,
-  "neuromuscular": 80,
+  "neuromuscular": 73,
   "braintumour": 66,
   "neuroinfect": 4,
   "als": 22,
@@ -24,7 +24,7 @@
  },
  "kinds": {
   "obs": 133,
-  "treat": 403,
+  "treat": 397,
   "diag": 18,
   "support": 124
  },

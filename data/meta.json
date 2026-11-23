@@ -1,5 +1,5 @@
 {
- "built": "2026-11-23T02:30:35Z",
+ "built": "2026-11-23T05:20:27Z",
  "country": "Canada",
  "studies": 4418,
  "registryTotal": 4135,
@@ -9,16 +9,16 @@
    "sites": 3586
   },
   "neurology": {
-   "studies": 678,
-   "sites": 1391
+   "studies": 672,
+   "sites": 1375
   },
   "other": {
-   "studies": 2591,
-   "sites": 6709
+   "studies": 2632,
+   "sites": 6803
   },
   "rare": {
-   "studies": 786,
-   "sites": 2139
+   "studies": 783,
+   "sites": 2138
   }
  },
  "hcOnly": 283,
