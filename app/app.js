@@ -16,8 +16,18 @@ const OPEN = s => s === "R" || s === "NYR";
 /* which registry a study comes from, by its number: [name, link] */
 const REG = id => /^NCT/.test(id) ? ["ClinicalTrials.gov", "https://clinicaltrials.gov/study/" + id]
   : /^ISRCTN/.test(id) ? ["ISRCTN", "https://www.isrctn.com/" + id]
+  : /^DRKS/.test(id) ? ["DRKS", "https://drks.de/search/en/trial/" + id]
   : ["EU CTIS", "https://euclinicaltrials.eu/search-for-clinical-trials/?lang=en&EUCT=" + encodeURIComponent(id)];
-const SOURCES = () => { const o = (META && (META.bySource || META.otherRegistries)) || {}; return ["ClinicalTrials.gov", o.ctis ? "EU CTIS" : "", o.isrctn ? "ISRCTN" : ""].filter(Boolean).join(" + "); };
+const SOURCES = () => { const o = (META && (META.bySource || META.otherRegistries)) || {}; return ["ClinicalTrials.gov", o.ctis ? "EU CTIS" : "", o.isrctn ? "ISRCTN" : "", o.drks ? "DRKS" : ""].filter(Boolean).join(" + "); };
+/* DRKS asks that its data always shows the source and the date it was obtained (CC BY 4.0) */
+const SRCLINE = d => {
+  const i = Math.max(0, ["en", "fr", "de", "it", "es"].indexOf(S.lang));
+  return [`Source: German Clinical Trials Register (DRKS, BfArM), data retrieved ${d}, licence CC BY 4.0.`,
+    `Source : Registre allemand des essais cliniques (DRKS, BfArM), données obtenues le ${d}, licence CC BY 4.0.`,
+    `Quelle: Deutsches Register Klinischer Studien (DRKS, BfArM), Daten abgerufen am ${d}, Lizenz CC BY 4.0.`,
+    `Fonte: Registro tedesco degli studi clinici (DRKS, BfArM), dati ottenuti il ${d}, licenza CC BY 4.0.`,
+    `Fuente: Registro alemán de ensayos clínicos (DRKS, BfArM), datos obtenidos el ${d}, licencia CC BY 4.0.`][i];
+};
 const KIND_ORDER = { treat: 0, diag: 1, support: 2, obs: 3 };
 const BLOOD = new Set(["leukemia", "lymphoma", "myeloma"]);
 /* languages: every label list is [English, French, German, Italian, Spanish]; a shorter list falls back to English */
@@ -563,7 +573,8 @@ function detailHTML(id, e) {
       ${sites.length > 6 ? `<details class="moresites"><summary>${esc(t("allN")(sites.length))}</summary><div class="sites">${sites.slice(6).map(siteHTML).join("")}</div></details>` : ""}</div>`}
     <details class="dsec"><summary>${esc(t("eligH"))}</summary><div class="crit" lang="en">${critHTML(d.criteria)}</div></details>
     <p class="dates">${esc(t("sponsor"))}: ${esc(d.sponsor)} · ${esc(t("started"))}: ${esc(fmtDate(d.start))} · ${esc(t("recUpd"))}: ${esc(fmtDate(d.upd))}</p>
-    <p><a href="${esc(REG(id)[1])}" target="_blank" rel="noopener">${esc(t("registry").replace("ClinicalTrials.gov", REG(id)[0]))}</a></p>`;
+    <p><a href="${esc(REG(id)[1])}" target="_blank" rel="noopener">${esc(t("registry").replace("ClinicalTrials.gov", REG(id)[0]))}</a></p>
+    ${d.retrieved ? `<p class="dates">${esc(SRCLINE(d.retrieved))}</p>` : ""}`;
 }
 function bindCopy(root) {
   root.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => {
