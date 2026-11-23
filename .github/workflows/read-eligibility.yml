@@ -74,6 +74,6 @@ jobs:
             echo "Nothing new to save"
           else
             git commit -m "Eligibility read for $(grep -c . .github/batch.txt) trials $(date -u +%F)"
-            git pull --rebase origin main
+            git pull --rebase -X theirs origin main
             git push
           fi

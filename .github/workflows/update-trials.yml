@@ -41,7 +41,7 @@ jobs:
           else
             if [ "${{ steps.build.outcome }}" = "success" ]; then msg="Trial data update $(date -u +%F)"; else msg="Trial data update failed $(date -u +%F) (log only)"; fi
             git commit -m "$msg"
-            git pull --rebase origin main
+            git pull --rebase -X theirs origin main
             git push
           fi
 
