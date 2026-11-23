@@ -1,4 +1,4 @@
-/* Find My Trial – page logic (area and country come from areas.js and country.js).
+/* Find My Trial™ – page logic (area and country come from areas.js and country.js).
    Settings (Mapbox token, organization name, contact) are at the top of index.html. */
 "use strict";
 

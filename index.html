@@ -49,12 +49,12 @@ const T = {
         neu: "Neurological conditions", neuP: "Stroke, epilepsy, MS, Parkinson's, dementia, migraine, ALS and more.",
         oth: "Other conditions", othP: "Heart, lungs, diabetes, mental health, infections, pregnancy and healthy volunteers.",
         rar: "Rare diseases", rarP: "Rare cancers and rare neurological, genetic, blood and metabolic conditions. These studies also appear in the other sections.",
-        niH: "What Find My Trial does not include",
+        niH: "What Find My Trial™ does not include",
         ni: m => [
           ["Studies that are not open to new participants", `Studies listed on ClinicalTrials.gov as active but not recruiting${m ? ` (${n(m.notIncluded?.ACTIVE_NOT_RECRUITING)})` : ""}, enrolling by invitation only${m ? ` (${n(m.notIncluded?.ENROLLING_BY_INVITATION)})` : ""}, suspended${m ? ` (${n(m.notIncluded?.SUSPENDED)})` : ""}, completed or withdrawn.`],
           ["Trials registered only outside ClinicalTrials.gov", "Trials listed only in other registries, such as ISRCTN or the EU Clinical Trials Register, are not included."],
           ...(COUNTRY.code === "CA" ? [["Health Canada trials with no registry record", `Health Canada's clinical trial search portal also lists authorized drug trials that have no public registry record${m && m.hcNoRegistry != null ? ` (${n(m.hcNoRegistry)} today)` : ""}. They have no sites, contacts or eligibility details, so they are not shown here. You can search them at clinical-trials-search.canada.ca.`]] : []),
-          ["Updates the sponsor has not made yet", "Find My Trial is only as current as the registry. A new site, a status change or a closed study may take time to appear."]
+          ["Updates the sponsor has not made yet", "Find My Trial™ is only as current as the registry. A new site, a status change or a closed study may take time to appear."]
         ],
         go: "Open →", studies: n => `${n.toLocaleString(COUNTRY.locale[0])} open studies`,
         note: d => `Pilot. Not medical advice. Data from ClinicalTrials.gov${COUNTRY.code === "CA" ? " and Health Canada's clinical trial search portal" : ""}, updated daily${d ? ` (last update ${d})` : ""}. In an emergency, call 911.`,
@@ -65,12 +65,12 @@ const T = {
         neu: "Affections neurologiques", neuP: "AVC, épilepsie, SEP, Parkinson, démence, migraine, SLA et plus.",
         oth: "Autres affections", othP: "Cœur, poumons, diabète, santé mentale, infections, grossesse et volontaires en santé.",
         rar: "Maladies rares", rarP: "Cancers rares et affections neurologiques, génétiques, sanguines et métaboliques rares. Ces études figurent aussi dans les autres sections.",
-        niH: "Ce que Find My Trial n'inclut pas",
+        niH: "Ce que Find My Trial™ n'inclut pas",
         ni: m => [
           ["Les études fermées aux nouveaux participants", `Les études inscrites sur ClinicalTrials.gov comme actives sans recrutement${m ? ` (${n(m.notIncluded?.ACTIVE_NOT_RECRUITING)})` : ""}, sur invitation seulement${m ? ` (${n(m.notIncluded?.ENROLLING_BY_INVITATION)})` : ""}, suspendues${m ? ` (${n(m.notIncluded?.SUSPENDED)})` : ""}, terminées ou retirées.`],
           ["Les essais inscrits seulement hors de ClinicalTrials.gov", "Les essais inscrits seulement dans d'autres registres, comme ISRCTN ou le registre européen des essais cliniques, ne sont pas inclus."],
           ...(COUNTRY.code === "CA" ? [["Les essais de Santé Canada sans dossier dans un registre", `Le portail de recherche de Santé Canada présente aussi des essais de médicaments autorisés qui n'ont aucun dossier public dans un registre${m && m.hcNoRegistry != null ? ` (${n(m.hcNoRegistry)} aujourd'hui)` : ""}. Ils n'ont ni sites, ni contacts, ni critères d'admissibilité, et ne sont donc pas affichés ici. Vous pouvez les chercher sur clinical-trials-search.canada.ca.`]] : []),
-          ["Les mises à jour que le promoteur n'a pas encore faites", "Find My Trial est aussi à jour que le registre. Un nouveau site, un changement de statut ou une étude fermée peut prendre du temps à apparaître."]
+          ["Les mises à jour que le promoteur n'a pas encore faites", "Find My Trial™ est aussi à jour que le registre. Un nouveau site, un changement de statut ou une étude fermée peut prendre du temps à apparaître."]
         ],
         go: "Ouvrir →", studies: n => `${n.toLocaleString(COUNTRY.locale[1])} études ouvertes`,
         note: d => `Pilote. Ne constitue pas un avis médical. Données de ClinicalTrials.gov${COUNTRY.code === "CA" ? " et du portail de recherche d'essais cliniques de Santé Canada" : ""}, mises à jour chaque jour${d ? ` (dernière mise à jour : ${d})` : ""}. En cas d'urgence, composez le 911.`,
