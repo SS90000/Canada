@@ -223,7 +223,10 @@ RARE_STOP = {"disease", "syndrome", "malformation syndrome", "clinical group", "
              "asthma", "diabetes mellitus", "arthritis", "cardiomyopathy", "neuropathy", "lymphoma", "leukemia", "leukaemia",
              "sarcoma", "carcinoma", "adenocarcinoma", "glioma", "myopathy", "pain", "fever", "short stature", "autism",
              "intellectual disability", "alopecia", "spinal cord injury", "non hodgkin lymphoma", "renal cell carcinoma",
-             "clear cell renal cell carcinoma", "squamous cell carcinoma of head and neck", "head and neck squamous cell carcinoma", "rare disease", "rare tumor", "rare cancer", "rare genetic disease", "head and neck cancer"}
+             "clear cell renal cell carcinoma", "squamous cell carcinoma of head and neck", "head and neck squamous cell carcinoma", "rare disease", "rare tumor", "rare cancer", "rare genetic disease", "head and neck cancer",
+             "small cell lung cancer", "small cell lung carcinoma", "hepatocellular carcinoma"}
+# everyday names of rare diseases that Orphanet only lists by subtype
+RARE_EXTRA = {"spinal muscular atrophy", "inflammatory myopathy", "idiopathic inflammatory myopathy"}
 
 
 def norm_name(t):
@@ -285,8 +288,10 @@ def rare_match(texts):
                     continue
                 for j in range(i + 1, min(len(w), i + 9) + 1):
                     g = " ".join(w[i:j])
-                    if g in RARE and g not in RARE_STOP:
-                        found.append(g)
+                    for h in (g, g[:-3] + "y" if g.endswith("ies") else g[:-1] if g.endswith("s") else g):
+                        if (h in RARE or h in RARE_EXTRA) and h not in RARE_STOP:
+                            found.append(h)
+                            break
     return found
 
 
@@ -385,6 +390,9 @@ STROKE_CARE = re.compile(r"acute (?:ischemic )?stroke|stroke (?:survivor|patient
 NEURODEV = re.compile(r"autis|attention deficit|\badhd\b", re.I)
 
 
+AUTOIMMUNE = re.compile(r"lupus|systemic sclerosis|scleroderma|rheumatoid|sj[oö]gren|vasculitis|inflammatory myopath|dermatomyositis|polymyositis|autoimmune disease", re.I)
+TRUE_NEUROMUSC = re.compile(r"myasthenia|muscular dystroph|duchenne|neuropath|guillain|\bcidp\b|charcot|spinal muscular|amyotrophic|motor neuron|inclusion body myositis", re.I)
+NEURO_PSYCH = re.compile(r"psychos[ie]s|psychotic|agitation|hallucinat|delusion|depressi|apathy", re.I)
 SMOKING = re.compile(r"smoking cessation|stop(ping)? smoking|quit(ting)? smoking|tobacco (cessation|use)|smokers?\b|vaping|e-cigarette", re.I)
 SCREEN_CTX = re.compile(r"(lung |bowel |colorectal |breast |cervical )?cancer (screening|prevention|risk)|(lung |bowel |colorectal |breast |cervical )?cancer screening|\blcs\b|low-dose ct", re.I)
 
@@ -414,6 +422,8 @@ def classify(ident, conds, meshes, ancestors, healthy):
     # atrial fibrillation studies that only aim to prevent stroke are heart studies
     if "stroke" in neuro and AF_PREVENT.search(ntext) and not STROKE_CARE.search(ntext):
         neuro.remove("stroke")
+    if "neuromuscular" in neuro and AUTOIMMUNE.search(base) and not TRUE_NEUROMUSC.search(base):
+        neuro.remove("neuromuscular")  # e.g. myositis with lupus or systemic sclerosis: a rheumatology study
     if len(neuro) > 1 and "generalneuro" in neuro:
         neuro.remove("generalneuro")  # only use the catch-all when nothing more specific matched
     if neuro:
@@ -423,6 +433,8 @@ def classify(ident, conds, meshes, ancestors, healthy):
         if healthy and "healthy" not in other and re.search(r"healthy", base, re.I):
             other.append("healthy")
         out["other"] = other or ["general"]
+    elif "neurology" in out and "oncology" not in out and NEURO_PSYCH.search(base):
+        out["other"] = ["mental"]
     rare = rare_match([*conds.get("conditions", []), *meshes])
     if rare or RARE_PHRASE.search(base):
         for g in rare:
