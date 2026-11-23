@@ -1,4 +1,4 @@
-/* Clinical Trial Finder – page logic (area and country come from areas.js and country.js).
+/* Find My Trial – page logic (area and country come from areas.js and country.js).
    Settings (Mapbox token, organization name, contact) are at the top of index.html. */
 "use strict";
 
@@ -45,16 +45,16 @@ const PROV_FR = COUNTRY.regionFr || {};
 
 const T = {
 en: {
-  sub: "Canada · All cancers · Beta", pill: "Beta",
-  band: (n, d) => `Beta. Not medical advice. Lists all ${n} open cancer studies with Canadian sites on ClinicalTrials.gov, updated daily (last update ${d}).`,
+  sub: "Canada · All cancers · Pilot", pill: "Pilot",
+  band: (n, d) => `Pilot. Not medical advice. Lists all ${n} open cancer studies with Canadian sites on ClinicalTrials.gov, updated daily (last update ${d}).`,
   loading: "Loading the latest trial list…", loadErr: "The trial list couldn't be loaded. Check your internet connection and reload the page.",
   h1: "Find cancer clinical trials in Canada",
   lede: "Search open clinical trials and studies for any type of cancer, near you or anywhere in Canada. See each site's status and contact, and read the full eligibility criteria, so you can raise the right studies with your care team.",
   before: "Before you start",
-  b1: "This is a beta version. It is not medical advice.", b2: "Results are a first screen. Only a study team can confirm whether you can join.",
+  b1: "This is a pilot version. It is not medical advice.", b2: "Results are a first screen. Only a study team can confirm whether you can join.",
   b3: "Study details may be out of date. Cancer type and disease stage are detected automatically and can be wrong.",
   b4: "Your answers stay in this browser tab. Nothing is saved or sent anywhere.", b5: `In an emergency, call ${EMERG} or go to the nearest emergency department.`,
-  consent: "I have read and agree to the Terms of use. I understand this is a beta, not medical advice, and that I should confirm everything with my care team.",
+  consent: "I have read and agree to the Terms of use. I understand this is a pilot, not medical advice, and that I should confirm everything with my care team.",
   readTerms: "Read the full terms of use",
   searchH: "Search", cat: "Type of cancer", catAny: "Any type of cancer", many: "Also show studies open to many cancer types",
   where: "Where", prov: "Province or territory", provAny: "Anywhere in Canada", near: "Near a city", nearPh: "Start typing a city", dist: "Within",
@@ -98,16 +98,16 @@ en: {
   trEn: "", km: d => `${Math.round(toUnit(d))} ${UNIT}`, kmAway: d => `${Math.round(toUnit(d))} ${UNIT} away`
 },
 fr: {
-  sub: "Canada · Tous les cancers · Bêta", pill: "Bêta",
-  band: (n, d) => `Bêta. Ne constitue pas un avis médical. Présente les ${n} études sur le cancer ouvertes ayant des sites au Canada sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`,
+  sub: "Canada · Tous les cancers · Pilote", pill: "Pilote",
+  band: (n, d) => `Pilote. Ne constitue pas un avis médical. Présente les ${n} études sur le cancer ouvertes ayant des sites au Canada sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`,
   loading: "Chargement de la liste à jour…", loadErr: "La liste des études n'a pas pu être chargée. Vérifiez votre connexion Internet et rechargez la page.",
   h1: "Trouver des essais cliniques sur le cancer au Canada",
   lede: "Cherchez des essais et des études ouverts pour tout type de cancer, près de chez vous ou partout au Canada. Consultez le statut et le contact de chaque site et les critères d'admissibilité complets, pour en parler avec votre équipe soignante.",
   before: "Avant de commencer",
-  b1: "Ceci est une version bêta. Ce n'est pas un avis médical.", b2: "Les résultats sont un premier tri. Seule l'équipe de l'étude peut confirmer votre admissibilité.",
+  b1: "Ceci est une version pilote. Ce n'est pas un avis médical.", b2: "Les résultats sont un premier tri. Seule l'équipe de l'étude peut confirmer votre admissibilité.",
   b3: "Les détails des études peuvent être dépassés. Le type de cancer et le stade sont détectés automatiquement et peuvent être erronés.",
   b4: "Vos réponses restent dans cet onglet. Rien n'est enregistré ni transmis.", b5: `En cas d'urgence, composez le ${EMERG} ou rendez-vous à l'urgence la plus proche.`,
-  consent: "J'ai lu et j'accepte les Conditions d'utilisation. Je comprends qu'il s'agit d'une version bêta, et non d'un avis médical, et que je dois tout confirmer avec mon équipe soignante.",
+  consent: "J'ai lu et j'accepte les Conditions d'utilisation. Je comprends qu'il s'agit d'une version pilote, et non d'un avis médical, et que je dois tout confirmer avec mon équipe soignante.",
   readTerms: "Lire les conditions d'utilisation complètes",
   searchH: "Recherche", cat: "Type de cancer", catAny: "Tout type de cancer", many: "Afficher aussi les études ouvertes à plusieurs types de cancer",
   where: "Où", prov: "Province ou territoire", provAny: "Partout au Canada", near: "Près d'une ville", nearPh: "Commencez à taper une ville", dist: "Dans un rayon de",
@@ -153,8 +153,8 @@ fr: {
 
 /* wording that depends on the area, the country or the language */
 const XT = {
-en: { beta: "Beta", backAll: "← All sections", langL: "Language",
-  band: (n, d, st, inN) => `Beta. Not medical advice. Lists all ${n} ${st} with sites ${inN} on ClinicalTrials.gov, updated daily (last update ${d}).`,
+en: { beta: "Pilot", backAll: "← All sections", langL: "Language",
+  band: (n, d, st, inN) => `Pilot. Not medical advice. Lists all ${n} ${st} with sites ${inN} on ClinicalTrials.gov, updated daily (last update ${d}).`,
   b3pre: "Study details may be out of date. ",
   hcBand: n => ` Also includes ${n} trials authorized by Health Canada whose Canadian sites are not listed yet.`,
   studyContact: "Main study contact", noStudyContact: "No main contact in the registry; see the sites below.",
@@ -162,13 +162,13 @@ en: { beta: "Beta", backAll: "← All sections", langL: "Language",
   hcTag: "Authorized by Health Canada", hcWhere: "Canada · sites not listed yet", hcFlag: "Canadian sites not listed yet",
   hcFlagP: "Health Canada has authorized this trial in Canada, but its ClinicalTrials.gov record doesn't list a Canadian site yet. Ask your care team, or contact the sponsor.",
   hcLink: "See the Health Canada record",
-  sumTitle: "CLINICAL TRIALS TO DISCUSS WITH MY CARE TEAM", sumBy: (b, o, d) => `Prepared with ${b} (beta, ${o}) on ${d}.`,
+  sumTitle: "CLINICAL TRIALS TO DISCUSS WITH MY CARE TEAM", sumBy: (b, o, d) => `Prepared with ${b} (pilot, ${o}) on ${d}.`,
   sumNA: d => `This is not medical advice. Data from ClinicalTrials.gov as of ${d}.`, sumSite: "Site", sumNote: "Note",
   sumQH: "QUESTIONS FOR MY DOCTOR",
   sumQs: stage => ["Is any of these studies a good fit for my situation?", stage ? "Do my cancer type and stage match their criteria?" : "Does my condition match their criteria?",
     "Would taking part delay my usual treatment?", "Can you refer me to the study team or contact them for me?"] },
-fr: { beta: "Bêta", backAll: "← Toutes les sections", langL: "Langue",
-  band: (n, d, st, inN) => `Bêta. Ne constitue pas un avis médical. Présente les ${n} ${st} ayant des sites ${inN} sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`,
+fr: { beta: "Pilote", backAll: "← Toutes les sections", langL: "Langue",
+  band: (n, d, st, inN) => `Pilote. Ne constitue pas un avis médical. Présente les ${n} ${st} ayant des sites ${inN} sur ClinicalTrials.gov, mises à jour chaque jour (dernière mise à jour : ${d}).`,
   b3pre: "Les détails des études peuvent être dépassés. ",
   hcBand: n => ` Comprend aussi ${n} essais autorisés par Santé Canada dont les sites canadiens ne sont pas encore publiés.`,
   studyContact: "Contact principal de l'étude", noStudyContact: "Aucun contact principal dans le registre; voir les sites ci-dessous.",
@@ -176,7 +176,7 @@ fr: { beta: "Bêta", backAll: "← Toutes les sections", langL: "Langue",
   hcTag: "Autorisé par Santé Canada", hcWhere: "Canada · sites pas encore publiés", hcFlag: "Sites canadiens pas encore publiés",
   hcFlagP: "Santé Canada a autorisé cet essai au Canada, mais son dossier sur ClinicalTrials.gov n'indique pas encore de site canadien. Parlez-en à votre équipe soignante ou communiquez avec le promoteur.",
   hcLink: "Voir la fiche de Santé Canada",
-  sumTitle: "ESSAIS CLINIQUES À DISCUTER AVEC MON ÉQUIPE SOIGNANTE", sumBy: (b, o, d) => `Préparé avec ${b} (bêta, ${o}) le ${d}.`,
+  sumTitle: "ESSAIS CLINIQUES À DISCUTER AVEC MON ÉQUIPE SOIGNANTE", sumBy: (b, o, d) => `Préparé avec ${b} (pilote, ${o}) le ${d}.`,
   sumNA: d => `Ceci n'est pas un avis médical. Données de ClinicalTrials.gov au ${d}.`, sumSite: "Site", sumNote: "Attention",
   sumQH: "QUESTIONS POUR MON MÉDECIN",
   sumQs: stage => ["Une de ces études est-elle adaptée à ma situation?", stage ? "Mon type et mon stade de cancer correspondent-ils à leurs critères?" : "Ma situation correspond-elle à leurs critères?",
@@ -189,7 +189,9 @@ for (const lg of Object.keys(T)) {
   x.sub = `${P(COUNTRY.name, i)} · ${P(A.short, i)} · ${y.beta}`;
   x.band = (n, d) => y.band(n, d, P(A.studies, i), P(COUNTRY.inName, i)).replace("ClinicalTrials.gov", SOURCES()) + (META && META.hcOnly ? y.hcBand(META.hcOnly) : "");
   x.h1 = P(A.h1(COUNTRY.inName), i); x.lede = P(A.lede, i);
-  x.b3 = y.b3pre + P(A.tagNote, i);
+  x.b3 = y.b3pre + P(A.tagNote, i) + " " + ["A person spot-checks a random sample from each section.",
+    "Une personne vérifie un échantillon au hasard dans chaque section.", "Eine Person prüft stichprobenartig Studien aus jedem Bereich.",
+    "Una persona controlla a campione gli studi di ogni area.", "Una persona revisa una muestra al azar de cada área."][i];
   x.cat = P(A.catLabel, i); x.catAny = P(A.catAny, i); x.prov = P(COUNTRY.region, i); x.provAny = P(COUNTRY.regionAny, i);
   x.brand = P(A.brand, i);
   x.backAll = y.backAll; x.langL = y.langL;

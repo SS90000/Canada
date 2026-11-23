@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Clinical Trial Finder</title>
-<meta name="description" content="Beta tools for finding open clinical trials: cancer, neurological conditions and other health conditions. Not medical advice.">
+<title>Find My Trial™</title>
+<meta name="description" content="Pilot tools for finding open clinical trials: cancer, neurological conditions and other health conditions. Not medical advice.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230f5c72'/%3E%3Ccircle cx='14' cy='14' r='6' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M18.5 18.5l6 6' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="app/style.css">
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <div class="brand"><b>Clinical Trial Finder</b><span id="sub"></span></div>
-  <span class="pill" id="pill">Beta</span>
+  <div class="brand"><b>Find My Trial™</b><span id="sub"></span></div>
+  <span class="pill" id="pill">Pilot</span>
   <div class="lang" role="group" aria-label="Language" id="langGroup">
     <button id="lang-en" aria-pressed="true" lang="en">EN</button>
     <button id="lang-fr" aria-pressed="false" lang="fr">FR</button>
@@ -43,37 +43,37 @@
 <script>
 "use strict";
 const T = {
-  en: { sub: `${COUNTRY.name[0]} · Beta`, h1: `Find clinical trials ${COUNTRY.inName[0]}`,
-        lede: "Choose an area to search open clinical trials and studies near you. Each finder shows every site's status and contact and the full eligibility criteria, so you can raise the right studies with your care team.",
+  en: { sub: `${COUNTRY.name[0]} · Pilot`, h1: `Find clinical trials ${COUNTRY.inName[0]}`,
+        lede: "Choose an area to search open clinical trials and studies near you. Each section shows every site's status and contact and the full eligibility criteria, so you can raise the right studies with your care team.",
         onc: "Cancer", oncP: "All types of cancer, including blood cancers and childhood cancers.",
         neu: "Neurological conditions", neuP: "Stroke, epilepsy, MS, Parkinson's, dementia, migraine, ALS and more.",
         oth: "Other conditions", othP: "Heart, lungs, diabetes, mental health, infections, pregnancy and healthy volunteers.",
-        rar: "Rare diseases", rarP: "Rare cancers and rare neurological, genetic, blood and metabolic conditions. These studies also appear in the other finders.",
-        niH: "What this finder does not include",
+        rar: "Rare diseases", rarP: "Rare cancers and rare neurological, genetic, blood and metabolic conditions. These studies also appear in the other sections.",
+        niH: "What Find My Trial does not include",
         ni: m => [
           ["Studies that are not open to new participants", `Studies listed on ClinicalTrials.gov as active but not recruiting${m ? ` (${n(m.notIncluded?.ACTIVE_NOT_RECRUITING)})` : ""}, enrolling by invitation only${m ? ` (${n(m.notIncluded?.ENROLLING_BY_INVITATION)})` : ""}, suspended${m ? ` (${n(m.notIncluded?.SUSPENDED)})` : ""}, completed or withdrawn.`],
           ["Trials registered only outside ClinicalTrials.gov", "Trials listed only in other registries, such as ISRCTN or the EU Clinical Trials Register, are not included."],
           ...(COUNTRY.code === "CA" ? [["Health Canada trials with no registry record", `Health Canada's clinical trial search portal also lists authorized drug trials that have no public registry record${m && m.hcNoRegistry != null ? ` (${n(m.hcNoRegistry)} today)` : ""}. They have no sites, contacts or eligibility details, so they are not shown here. You can search them at clinical-trials-search.canada.ca.`]] : []),
-          ["Updates the sponsor has not made yet", "The finder is only as current as the registry. A new site, a status change or a closed study may take time to appear."]
+          ["Updates the sponsor has not made yet", "Find My Trial is only as current as the registry. A new site, a status change or a closed study may take time to appear."]
         ],
-        go: "Open the finder →", studies: n => `${n.toLocaleString(COUNTRY.locale[0])} open studies`,
-        note: d => `Beta. Not medical advice. Data from ClinicalTrials.gov${COUNTRY.code === "CA" ? " and Health Canada's clinical trial search portal" : ""}, updated daily${d ? ` (last update ${d})` : ""}. In an emergency, call 911.`,
+        go: "Open →", studies: n => `${n.toLocaleString(COUNTRY.locale[0])} open studies`,
+        note: d => `Pilot. Not medical advice. Data from ClinicalTrials.gov${COUNTRY.code === "CA" ? " and Health Canada's clinical trial search portal" : ""}, updated daily${d ? ` (last update ${d})` : ""}. In an emergency, call 911.`,
         foot: `Operated by ${ORG.name}. Not affiliated with or endorsed by ClinicalTrials.gov or the U.S. National Library of Medicine.` },
-  fr: { sub: `${COUNTRY.name[1]} · Bêta`, h1: `Trouver des essais cliniques ${COUNTRY.inName[1]}`,
-        lede: "Choisissez un domaine pour chercher des essais et des études ouverts près de chez vous. Chaque outil indique le statut et le contact de chaque site et les critères d'admissibilité complets.",
+  fr: { sub: `${COUNTRY.name[1]} · Pilote`, h1: `Trouver des essais cliniques ${COUNTRY.inName[1]}`,
+        lede: "Choisissez un domaine pour chercher des essais et des études ouverts près de chez vous. Chaque section indique le statut et le contact de chaque site et les critères d'admissibilité complets.",
         onc: "Cancer", oncP: "Tous les types de cancer, y compris les cancers du sang et de l'enfant.",
         neu: "Affections neurologiques", neuP: "AVC, épilepsie, SEP, Parkinson, démence, migraine, SLA et plus.",
         oth: "Autres affections", othP: "Cœur, poumons, diabète, santé mentale, infections, grossesse et volontaires en santé.",
-        rar: "Maladies rares", rarP: "Cancers rares et affections neurologiques, génétiques, sanguines et métaboliques rares. Ces études figurent aussi dans les autres outils.",
-        niH: "Ce que l'outil n'inclut pas",
+        rar: "Maladies rares", rarP: "Cancers rares et affections neurologiques, génétiques, sanguines et métaboliques rares. Ces études figurent aussi dans les autres sections.",
+        niH: "Ce que Find My Trial n'inclut pas",
         ni: m => [
           ["Les études fermées aux nouveaux participants", `Les études inscrites sur ClinicalTrials.gov comme actives sans recrutement${m ? ` (${n(m.notIncluded?.ACTIVE_NOT_RECRUITING)})` : ""}, sur invitation seulement${m ? ` (${n(m.notIncluded?.ENROLLING_BY_INVITATION)})` : ""}, suspendues${m ? ` (${n(m.notIncluded?.SUSPENDED)})` : ""}, terminées ou retirées.`],
           ["Les essais inscrits seulement hors de ClinicalTrials.gov", "Les essais inscrits seulement dans d'autres registres, comme ISRCTN ou le registre européen des essais cliniques, ne sont pas inclus."],
           ...(COUNTRY.code === "CA" ? [["Les essais de Santé Canada sans dossier dans un registre", `Le portail de recherche de Santé Canada présente aussi des essais de médicaments autorisés qui n'ont aucun dossier public dans un registre${m && m.hcNoRegistry != null ? ` (${n(m.hcNoRegistry)} aujourd'hui)` : ""}. Ils n'ont ni sites, ni contacts, ni critères d'admissibilité, et ne sont donc pas affichés ici. Vous pouvez les chercher sur clinical-trials-search.canada.ca.`]] : []),
-          ["Les mises à jour que le promoteur n'a pas encore faites", "L'outil est aussi à jour que le registre. Un nouveau site, un changement de statut ou une étude fermée peut prendre du temps à apparaître."]
+          ["Les mises à jour que le promoteur n'a pas encore faites", "Find My Trial est aussi à jour que le registre. Un nouveau site, un changement de statut ou une étude fermée peut prendre du temps à apparaître."]
         ],
-        go: "Ouvrir l'outil →", studies: n => `${n.toLocaleString(COUNTRY.locale[1])} études ouvertes`,
-        note: d => `Bêta. Ne constitue pas un avis médical. Données de ClinicalTrials.gov${COUNTRY.code === "CA" ? " et du portail de recherche d'essais cliniques de Santé Canada" : ""}, mises à jour chaque jour${d ? ` (dernière mise à jour : ${d})` : ""}. En cas d'urgence, composez le 911.`,
+        go: "Ouvrir →", studies: n => `${n.toLocaleString(COUNTRY.locale[1])} études ouvertes`,
+        note: d => `Pilote. Ne constitue pas un avis médical. Données de ClinicalTrials.gov${COUNTRY.code === "CA" ? " et du portail de recherche d'essais cliniques de Santé Canada" : ""}, mises à jour chaque jour${d ? ` (dernière mise à jour : ${d})` : ""}. En cas d'urgence, composez le 911.`,
         foot: `Exploité par ${ORG.name}. Non affilié à ClinicalTrials.gov ni à la National Library of Medicine des États-Unis, et non approuvé par eux.` }
 };
 let META = null;
@@ -88,7 +88,7 @@ function render() {
   document.documentElement.lang = lang;
   document.getElementById("langGroup").hidden = COUNTRY.langs.length < 2;
   document.getElementById("sub").textContent = t.sub;
-  document.getElementById("pill").textContent = lang === "fr" ? "Bêta" : "Beta";
+  document.getElementById("pill").textContent = lang === "fr" ? "Pilote" : "Pilote";
   document.getElementById("h1").textContent = t.h1;
   document.getElementById("lede").textContent = t.lede;
   document.querySelectorAll("[data-t]").forEach(el => el.textContent = t[el.dataset.t]);

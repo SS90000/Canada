@@ -3,7 +3,7 @@
 "use strict";
 const AREAS = {
   oncology: {
-    brand: ["Cancer Trial Finder", "Essais cliniques sur le cancer"],
+    brand: ["Find My Trial™ · Cancer", "Find My Trial™ · Cancer"],
     short: ["All cancers", "Tous les cancers"],
     studies: ["open cancer studies", "études sur le cancer ouvertes"],
     h1: c => [`Find cancer clinical trials ${c[0]}`, `Trouver des essais cliniques sur le cancer ${c[1]}`],
@@ -27,7 +27,7 @@ const AREAS = {
     }
   },
   neurology: {
-    brand: ["Neurology Trial Finder", "Essais cliniques en neurologie"],
+    brand: ["Find My Trial™ · Neurology", "Find My Trial™ · Neurologie"],
     short: ["Neurological conditions", "Affections neurologiques"],
     studies: ["open studies on neurological conditions", "études ouvertes sur les affections neurologiques"],
     h1: c => [`Find clinical trials for neurological conditions ${c[0]}`, `Trouver des essais cliniques sur les affections neurologiques ${c[1]}`],
@@ -48,12 +48,12 @@ const AREAS = {
     }
   },
   other: {
-    brand: ["Clinical Trial Finder", "Essais cliniques"],
+    brand: ["Find My Trial™ · Other conditions", "Find My Trial™ · Autres affections"],
     short: ["Other conditions", "Autres affections"],
     studies: ["open studies on other health conditions", "études ouvertes sur d'autres affections"],
     h1: c => [`Find clinical trials for other health conditions ${c[0]}`, `Trouver des essais cliniques sur d'autres affections ${c[1]}`],
-    lede: ["Search open clinical trials and studies for heart and lung conditions, diabetes, mental health, infections, pregnancy, rare diseases and many other conditions, including studies for healthy volunteers. Cancer and neurological conditions have their own finders.",
-           "Cherchez des essais et des études ouverts sur le cœur et les poumons, le diabète, la santé mentale, les infections, la grossesse, les maladies rares et bien d'autres affections, y compris des études pour volontaires en santé. Le cancer et les affections neurologiques ont leurs propres outils."],
+    lede: ["Search open clinical trials and studies for heart and lung conditions, diabetes, mental health, infections, pregnancy, rare diseases and many other conditions, including studies for healthy volunteers. Cancer and neurological conditions have their own sections.",
+           "Cherchez des essais et des études ouverts sur le cœur et les poumons, le diabète, la santé mentale, les infections, la grossesse, les maladies rares et bien d'autres affections, y compris des études pour volontaires en santé. Le cancer et les affections neurologiques ont leurs propres sections."],
     tagNote: ["The condition each study is for is detected automatically and can be wrong.", "L'affection visée par chaque étude est détectée automatiquement et peut être erronée."],
     catLabel: ["Condition area", "Domaine"], catAny: ["Any condition", "Toute affection"],
     about: ["about a health condition other than cancer or a neurological condition", "portant sur une affection autre que le cancer ou une affection neurologique"], tagged: ["The condition area each study is for is detected", "Le domaine visé par chaque étude est détecté"],
@@ -70,12 +70,12 @@ const AREAS = {
     }
   },
   rare: {
-    brand: ["Rare Disease Trial Finder", "Essais cliniques sur les maladies rares"],
+    brand: ["Find My Trial™ · Rare diseases", "Find My Trial™ · Maladies rares"],
     short: ["Rare diseases", "Maladies rares"],
     studies: ["open studies on rare diseases", "études ouvertes sur les maladies rares"],
     h1: c => [`Find clinical trials for rare diseases ${c[0]}`, `Trouver des essais cliniques sur les maladies rares ${c[1]}`],
-    lede: ["Search open clinical trials and studies for rare diseases, including rare cancers and rare neurological, genetic, blood and metabolic conditions. These studies also appear in the cancer, neurology and other finders. See each site's status and contact, and read the full eligibility criteria.",
-           "Cherchez des essais et des études ouverts sur les maladies rares, y compris les cancers rares et les affections neurologiques, génétiques, sanguines et métaboliques rares. Ces études figurent aussi dans les autres outils. Consultez le statut et le contact de chaque site et les critères d'admissibilité complets."],
+    lede: ["Search open clinical trials and studies for rare diseases, including rare cancers and rare neurological, genetic, blood and metabolic conditions. These studies also appear in the cancer, neurology and other sections. See each site's status and contact, and read the full eligibility criteria.",
+           "Cherchez des essais et des études ouverts sur les maladies rares, y compris les cancers rares et les affections neurologiques, génétiques, sanguines et métaboliques rares. Ces études figurent aussi dans les autres sections. Consultez le statut et le contact de chaque site et les critères d'admissibilité complets."],
     tagNote: ["Rare diseases are detected automatically by matching each study's conditions to Orphanet's list of rare diseases, and can be wrong.", "Les maladies rares sont détectées automatiquement en comparant les affections de chaque étude à la liste d'Orphanet, et peuvent être erronées."],
     catLabel: ["Type of rare disease", "Type de maladie rare"], catAny: ["Any rare disease", "Toute maladie rare"],
     about: ["about a rare disease", "portant sur une maladie rare"], tagged: ["Whether a study is about a rare disease, and its type, are detected", "Le fait qu'une étude porte sur une maladie rare, et son type, sont détectés"],

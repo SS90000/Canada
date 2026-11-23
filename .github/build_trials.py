@@ -385,6 +385,10 @@ STROKE_CARE = re.compile(r"acute (?:ischemic )?stroke|stroke (?:survivor|patient
 NEURODEV = re.compile(r"autis|attention deficit|\badhd\b", re.I)
 
 
+SMOKING = re.compile(r"smoking cessation|stop(ping)? smoking|quit(ting)? smoking|tobacco (cessation|use)|smokers?\b|vaping|e-cigarette", re.I)
+SCREEN_CTX = re.compile(r"(lung |bowel |colorectal |breast |cervical )?cancer (screening|prevention|risk)|(lung |bowel |colorectal |breast |cervical )?cancer screening|\blcs\b|low-dose ct", re.I)
+
+
 def classify(ident, conds, meshes, ancestors, healthy):
     """Return {area: [categories]} for the areas this study belongs to."""
     base = " | ".join([ident.get("briefTitle", ""), ident.get("officialTitle", ""),
@@ -396,6 +400,9 @@ def classify(ident, conds, meshes, ancestors, healthy):
                         *[m for m in meshes if not re.match(r"Parkinson Disease \d", m)]])
     out = {}
     is_cancer = bool(ONC_GATE.search(base))
+    # stop-smoking studies offered at cancer screening are not for people with cancer
+    if is_cancer and SMOKING.search(base) and not ONC_GATE.search(SCREEN_CTX.sub(" ", base)):
+        is_cancer = False
     onc = [k for k, rx in ONC_RE if rx.search(base)] if is_cancer else []
     if is_cancer and not onc:
         onc = ["general"]

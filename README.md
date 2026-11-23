@@ -1,6 +1,6 @@
-# Clinical Trial Finder · Canada (beta)
+# Find My Trial™ · Canada (pilot)
 
-Patient-facing finders for open clinical trials with sites in Canada, by Salish Seven.
+Find My Trial™: patient-facing search for open clinical trials with sites in Canada, by Salish Seven.
 
 - Landing page: https://ss90000.github.io/Canada/
 - Cancer: https://ss90000.github.io/Canada/oncology/
@@ -28,4 +28,12 @@ Rare-disease studies are found by matching each study's conditions to Orphanet's
 - Canada only: Health Canada-authorized trials with no public registry record. They have no sites, contacts or eligibility details. The count is in `data/meta.json` under `hcNoRegistry`.
 - Changes a sponsor has not yet made in the registry.
 
-The landing page shows the same list under "What this finder does not include".
+The landing page shows the same list under "What Find My Trial does not include".
+
+## Quality checks
+
+- **Coverage (November 2026).** The list was compared with ClinicalTrials.gov in both directions: all 4,128 open studies with a Canadian site were present and nothing extra was listed. 240 fields (status, sites, ages, contacts) were checked against the registry records and all matched.
+- **Health Canada.** The Health Canada clinical trial portal was compared too. 279 authorized trials that are open on ClinicalTrials.gov but list no Canadian site were added, labelled "Authorized by Health Canada". 383 portal trials with no registry record are counted under "What Find My Trial does not include".
+- **Human review (November 2026).** A person checked a random sample from each section against the registry record. Canada: 24 studies, 2 in the wrong section (both neurology). US: 21 studies, 2 in the wrong section (both other conditions). No intervention type was wrong. All four errors were fixed.
+
+The sorting into sections and categories is automatic (text matching), so some studies will still be in the wrong place. Each pattern found in a review is fixed in `.github/build_trials.py` so that every similar study moves too, not just the one reviewed.
