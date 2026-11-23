@@ -1,20 +1,20 @@
 {
- "built": "2026-11-22T10:10:51Z",
+ "built": "2026-11-23T02:17:24Z",
  "country": "Canada",
  "studies": 4418,
  "registryTotal": 4135,
  "areas": {
   "oncology": {
-   "studies": 1248,
-   "sites": 3587
+   "studies": 1247,
+   "sites": 3586
   },
   "neurology": {
    "studies": 678,
    "sites": 1391
   },
   "other": {
-   "studies": 2590,
-   "sites": 6708
+   "studies": 2591,
+   "sites": 6709
   },
   "rare": {
    "studies": 786,

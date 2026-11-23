@@ -1,10 +1,10 @@
 {
- "built": "2026-11-22T10:10:51Z",
+ "built": "2026-11-23T02:17:24Z",
  "country": "Canada",
  "area": "oncology",
- "studies": 1248,
+ "studies": 1247,
  "registryTotal": 4135,
- "sites": 3587,
+ "sites": 3586,
  "hcOnly": 117,
  "categories": {
   "breast": 156,
@@ -18,7 +18,7 @@
   "lung": 187,
   "sarcoma": 47,
   "solid": 162,
-  "gyn": 126,
+  "gyn": 125,
   "upperGI": 48,
   "skin": 56,
   "kidney": 31,
@@ -34,7 +34,7 @@
  },
  "kinds": {
   "obs": 144,
-  "treat": 908,
+  "treat": 907,
   "diag": 51,
   "support": 145
  },
