@@ -1,21 +1,21 @@
 {
- "built": "2026-11-27T10:31:13Z",
+ "built": "2026-11-28T10:16:59Z",
  "country": "Canada",
  "area": "oncology",
  "studies": 1241,
- "registryTotal": 4138,
- "sites": 3593,
- "hcOnly": 114,
+ "registryTotal": 4142,
+ "sites": 3596,
+ "hcOnly": 112,
  "categories": {
   "breast": 156,
   "prostate": 134,
   "colorectal": 102,
   "leukemia": 113,
-  "lymphoma": 120,
+  "lymphoma": 121,
   "myeloma": 57,
   "general": 79,
   "childhood": 62,
-  "lung": 187,
+  "lung": 186,
   "sarcoma": 48,
   "solid": 161,
   "gyn": 124,
@@ -34,9 +34,9 @@
  },
  "kinds": {
   "obs": 144,
-  "treat": 902,
+  "treat": 903,
   "diag": 51,
-  "support": 144
+  "support": 143
  },
  "source": "ClinicalTrials.gov API v2"
 }
